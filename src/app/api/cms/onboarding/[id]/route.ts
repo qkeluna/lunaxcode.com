@@ -39,9 +39,9 @@ export const GET = withAuth(async (request: NextRequest, { params }: { params: P
 });
 
 // Helper function to build update data
-function buildUpdateData(body: OnboardingSubmissionUpdateRequest, existingSubmission: any) {
+function buildUpdateData(body: OnboardingSubmissionUpdateRequest, existingSubmission: Record<string, unknown>) {
   const now = new Date().toISOString();
-  const updateData: any = { updatedAt: now };
+  const updateData: Record<string, unknown> = { updatedAt: now };
 
   // Basic fields
   const basicFields = [

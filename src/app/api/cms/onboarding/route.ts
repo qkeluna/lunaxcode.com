@@ -5,8 +5,10 @@ import { onboardingSubmission } from '@/lib/schema';
 import { createApiResponse, createErrorResponse, withAuth } from '@/lib/auth';
 import { 
   OnboardingSubmissionCreateRequest, 
-  OnboardingSubmissionUpdateRequest,
-  OnboardingSubmissionFilters 
+  OnboardingSubmissionFilters,
+  ServiceType,
+  SubmissionStatus,
+  SubmissionPriority
 } from '@/types/onboarding';
 import { randomUUID } from 'crypto';
 
@@ -23,9 +25,9 @@ export const GET = withAuth(async (request: NextRequest) => {
     const offset = (page - 1) * limit;
     
     const filters: OnboardingSubmissionFilters = {
-      serviceType: searchParams.get('serviceType') as any,
-      status: searchParams.get('status') as any,
-      priority: searchParams.get('priority') as any,
+      serviceType: (searchParams.get('serviceType') as ServiceType) || undefined,
+      status: (searchParams.get('status') as SubmissionStatus) || undefined,
+      priority: (searchParams.get('priority') as SubmissionPriority) || undefined,
       assignedTo: searchParams.get('assignedTo') || undefined,
       dateFrom: searchParams.get('dateFrom') || undefined,
       dateTo: searchParams.get('dateTo') || undefined,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -70,7 +70,7 @@ export default function OnboardingDashboard() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Fetch submissions
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -109,12 +109,12 @@ export default function OnboardingDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, filters]);
 
   // Initial load
   useEffect(() => {
     fetchSubmissions();
-  }, [pagination.page, pagination.limit]);
+  }, [fetchSubmissions]);
 
   // Search and filter handler
   const handleSearch = () => {
