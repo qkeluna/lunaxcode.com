@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Enable experimental features for better Cloudflare compatibility
   experimental: {
+    // Optimize for Edge Runtime
+    esmExternals: true,
     // Additional experimental features can be added here
   },
   
