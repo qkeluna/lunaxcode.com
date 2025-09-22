@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useSession, signOut } from '@/lib/auth-client';
 import { 
   LayoutDashboard, 
   DollarSign, 
@@ -35,56 +35,62 @@ const navigation = [
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [user, setUser] = useState<{ name: string; email: string; username?: string; role?: string } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: session, isPending } = useSession();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check authentication
-    const token = localStorage.getItem('cms_token');
-    const userData = localStorage.getItem('cms_user');
-
-    if (!token || !userData) {
+    // Check authentication - redirect to admin login if not authenticated
+    if (!isPending && !session) {
       router.push('/admin');
       return;
     }
+  }, [session, isPending, router]);
 
-    try {
-      setUser(JSON.parse(userData));
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      router.push('/admin');
-    }
-  }, [router]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('cms_token');
-    localStorage.removeItem('cms_user');
+  const handleSignOut = async () => {
+    await signOut();
     router.push('/admin');
   };
 
-  if (!user) {
+  // Show loading state while checking authentication
+  if (isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
       </div>
     );
   }
 
+  // Redirect if not authenticated
+  if (!session) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setSidebarOpen(false)} />
+        </div>
+      )}
+
       {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <button 
-          className="fixed inset-0 bg-gray-600 bg-opacity-75 border-0" 
-          onClick={() => setSidebarOpen(false)}
-          aria-label="Close sidebar"
-        />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white dark:bg-gray-800 shadow-xl">
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 transform transition-transform duration-300 ease-in-out lg:hidden ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex h-16 items-center justify-between px-4">
             <span className="text-xl font-bold text-blue-600">Lunaxcode CMS</span>
-            <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(false)}
+            >
               <X className="h-5 w-5" />
             </Button>
           </div>
@@ -158,33 +164,37 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               
               <div className="flex items-center space-x-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    {(user.username || user.name || user.email).charAt(0).toUpperCase()}
+                  <AvatarFallback className="bg-blue-100 text-blue-600">
+                    {session.user.name ? session.user.name.charAt(0).toUpperCase() : session.user.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
+                
                 <div className="hidden sm:block">
                   <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user.username || user.name}
+                    {session.user.name || 'Admin User'}
                   </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {user.role || 'Admin'}
-                  </Badge>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {session.user.email}
+                  </div>
                 </div>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </Button>
               </div>
-              
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4" />
-                <span className="sr-only">Sign out</span>
-              </Button>
             </div>
           </div>
         </div>
 
         {/* Page content */}
-        <main className="py-6">
-          <div className="px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+        <main className="p-4 sm:p-6 lg:p-8">
+          {children}
         </main>
       </div>
     </div>

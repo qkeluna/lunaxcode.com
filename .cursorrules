@@ -1,0 +1,274 @@
+# Lunaxcode.com Cursor Rules
+# Project: Next.js 15 Marketing Website for Filipino Web Development Agency
+# Last Updated: January 2025
+
+## 🎯 PROJECT OVERVIEW & CONTEXT
+You are working on **Lunaxcode.com**, a Next.js 15 marketing website for a Filipino web development agency specializing in rapid 48-hour landing page delivery. The site features a comprehensive multi-step onboarding flow with service-specific forms, dynamic pricing, and modern animations.
+
+**Business Context:**
+- Target audience: Filipino SMEs needing rapid web development
+- Core value prop: Professional websites delivered in 48 hours
+- Services: Landing pages (48h), full websites (5d-3w), mobile apps (4-12w)
+- Pricing: Landing pages ₱9,999-25,999, Full websites ₱19,999-89,999, Mobile apps ₱89,999-999,999
+
+## 🛠 TECH STACK ENFORCEMENT
+
+### Framework & Build Tools (NON-NEGOTIABLE)
+- **ALWAYS** use Next.js 15.5.3+ with App Router (never Pages Router)
+- **ALWAYS** use React 19.1.0+ features and patterns
+- **ALWAYS** use Turbopack for development (`pnpm dev` with --turbopack flag)
+- **ALWAYS** use pnpm@10.14.0+ as package manager (never npm or yarn)
+
+### UI & Styling (REQUIRED)
+- **ALWAYS** use Tailwind CSS v4 with shadcn/ui components (New York style)
+- **ALWAYS** use `cn()` utility from `src/lib/utils.ts` for conditional classes
+- **ALWAYS** use `class-variance-authority` (cva) for component variants
+- **ALWAYS** use Lucide React v0.544.0+ for icons (never other icon libraries)
+- **ALWAYS** support dark mode via CSS custom properties and class-based themes
+
+### State & Forms (MANDATORY)
+- **ALWAYS** use Zustand v5.0.8+ for global state management
+- **ALWAYS** use React Hook Form v7.62.0+ with Zod v4.1.9+ validation
+- **ALWAYS** use `@hookform/resolvers` with `zodResolver()` pattern
+- **ALWAYS** use Framer Motion v12.23.15+ for animations
+
+## 📁 FILE STRUCTURE & NAMING RULES
+
+### Directory Structure (STRICT)
+```
+src/
+├── app/                 # Next.js App Router pages
+├── components/
+│   ├── landing/        # Page-specific components
+│   ├── providers/      # Context providers
+│   ├── sections/       # Major page sections
+│   └── ui/            # shadcn/ui components
+├── hooks/             # Custom React hooks
+├── lib/               # Utilities and configurations
+└── types/             # TypeScript type definitions
+```
+
+### Naming Conventions (ENFORCED)
+- **ALWAYS** use kebab-case for directories (`landing/`, `sections/`)
+- **ALWAYS** use PascalCase for React components (`OnboardingModal.tsx`)
+- **ALWAYS** use camelCase for hooks (`useOnboardingStore`)
+- **ALWAYS** use camelCase for utility functions
+- **ALWAYS** collocate related components (modals with their triggers)
+
+## 🎨 STYLING RULES (MANDATORY)
+
+### Color Scheme (STRICT)
+- **Primary**: Blue (#3B82F6) - use `bg-blue-500`, `text-blue-500`, etc.
+- **Accent**: Red (#EF4444) - use `bg-red-500`, `text-red-500`, etc.
+- **Neutral**: Gray scale for text - use Tailwind gray variants
+- **NEVER** introduce new color schemes without approval
+
+### CSS Patterns (REQUIRED)
+- **ALWAYS** use Tailwind CSS classes, avoid custom CSS when possible
+- **ALWAYS** use CSS variables for theming (see `globals.css`)
+- **ALWAYS** implement dark mode support for all components
+- **ALWAYS** use `baseColor: "slate"` for shadcn/ui theming
+
+### Typography (ENFORCED)
+- **ALWAYS** use Inter font for body text
+- **ALWAYS** use Poppins font for headings
+- **ALWAYS** optimize fonts with Next.js font optimization
+
+## 🔄 STATE MANAGEMENT RULES
+
+### Zustand Store Patterns (MANDATORY)
+- **ALWAYS** use `useOnboardingStore` for onboarding flow state
+- **ALWAYS** include these state properties:
+  - `isModalOpen`: Boolean for modal visibility
+  - `selectedService`: Service type (landing_page, web_app, mobile_app)
+  - `formData`: Accumulated form data across steps
+  - `currentStep`: Current step in multi-step form (1-3)
+- **ALWAYS** include these actions: `openModal(service)`, `closeModal()`, `setFormData()`, `setCurrentStep()`, `reset()`
+- **ALWAYS** reset state on modal close for clean UX
+
+## 📝 FORM HANDLING RULES (STRICT)
+
+### Validation Schemas (REQUIRED)
+- **ALWAYS** create service-specific Zod schemas
+- **ALWAYS** implement `basicInfoSchema` for common fields
+- **ALWAYS** create `serviceSpecificSchemas` for different service types
+- **ALWAYS** validate: projectName, companyName, industry, budget, timeline
+- **ALWAYS** use `zodResolver()` for seamless form validation
+
+### Form Implementation (MANDATORY)
+- **ALWAYS** use React Hook Form with TypeScript
+- **ALWAYS** implement multi-step validation
+- **ALWAYS** show progress indicators for multi-step forms
+- **ALWAYS** handle form errors gracefully with clear messaging
+
+## 🎬 ANIMATION STANDARDS (ENFORCED)
+
+### Framer Motion Patterns (REQUIRED)
+- **ALWAYS** use container/item pattern for staggered animations
+- **ALWAYS** use consistent timing: `staggerChildren: 0.2, delayChildren: 0.3`
+- **ALWAYS** implement page transitions for navigation
+- **ALWAYS** add reveal animations for component mounting
+
+### Performance Rules (MANDATORY)
+- **ALWAYS** use dynamic imports for heavy components (like OnboardingModal)
+- **ALWAYS** implement proper loading states
+- **ALWAYS** avoid SSR issues with client-only animations
+
+## 🔧 COMPONENT DEVELOPMENT RULES
+
+### shadcn/ui Integration (STRICT)
+- **ALWAYS** use New York style variants
+- **ALWAYS** maintain RSC (React Server Component) support
+- **ALWAYS** include focus-visible states for accessibility
+- **ALWAYS** use proper TypeScript types for component props
+
+### Component Architecture (REQUIRED)
+- **ALWAYS** create reusable components in appropriate directories
+- **ALWAYS** implement proper prop interfaces with TypeScript
+- **ALWAYS** include proper accessibility attributes (ARIA)
+- **ALWAYS** support both light and dark themes
+
+## 🚀 DEVELOPMENT WORKFLOW RULES
+
+### Command Standards (ENFORCED)
+- **Development**: `pnpm dev` (with Turbopack)
+- **Build**: `pnpm build` (with Turbopack)
+- **Production**: `pnpm start`
+- **Linting**: `pnpm lint`
+- **NEVER** use npm or yarn commands
+
+### Code Quality (MANDATORY)
+- **ALWAYS** use TypeScript with strict type checking
+- **ALWAYS** follow ESLint configuration
+- **ALWAYS** implement proper error boundaries
+- **ALWAYS** handle loading and error states
+
+## 🔍 SEO & PERFORMANCE RULES (CRITICAL)
+
+### Meta Configuration (REQUIRED)
+- **ALWAYS** target Filipino market in meta tags
+- **ALWAYS** include OpenGraph and Twitter cards
+- **ALWAYS** set locale to `en_PH`
+- **ALWAYS** implement structured data for better SEO
+- **ALWAYS** use canonical URLs
+
+### Performance Standards (MANDATORY)
+- **ALWAYS** optimize images with Next.js Image component
+- **ALWAYS** implement proper caching strategies
+- **ALWAYS** minimize bundle size with dynamic imports
+- **ALWAYS** achieve Core Web Vitals compliance
+
+## 📱 RESPONSIVE DESIGN RULES (STRICT)
+
+### Breakpoint Standards (ENFORCED)
+- **Mobile First**: Start with mobile design, scale up
+- **Tailwind Breakpoints**: Use `sm:`, `md:`, `lg:`, `xl:`, `2xl:` consistently
+- **Touch Targets**: Minimum 44px for interactive elements
+- **ALWAYS** test on actual mobile devices
+
+## 🔐 SECURITY & BEST PRACTICES (NON-NEGOTIABLE)
+
+### Data Handling (CRITICAL)
+- **ALWAYS** validate all user inputs with Zod schemas
+- **ALWAYS** sanitize data before processing
+- **ALWAYS** implement proper CSRF protection
+- **ALWAYS** use environment variables for sensitive data
+
+### Accessibility (MANDATORY)
+- **ALWAYS** include proper ARIA labels
+- **ALWAYS** implement keyboard navigation
+- **ALWAYS** maintain color contrast ratios (WCAG AA)
+- **ALWAYS** test with screen readers
+
+## 🚨 ERROR HANDLING RULES (REQUIRED)
+
+### Implementation Standards (MANDATORY)
+- **ALWAYS** implement React Error Boundaries
+- **ALWAYS** provide fallback UI for errors
+- **ALWAYS** log errors appropriately
+- **ALWAYS** show user-friendly error messages
+- **ALWAYS** implement retry mechanisms where appropriate
+
+## 📊 ANALYTICS & TRACKING (FUTURE-READY)
+
+### Implementation Preparation (RECOMMENDED)
+- **Structure code** to easily add analytics
+- **Plan for** conversion tracking on onboarding completion
+- **Prepare for** A/B testing infrastructure
+- **Consider** performance monitoring integration
+
+## 🔄 INTEGRATION RULES (CRITICAL)
+
+### Key Integration Points (MANDATORY)
+- **ALWAYS** use dynamic imports for OnboardingModal to avoid SSR issues
+- **ALWAYS** wrap app with ThemeProvider for system preference detection
+- **ALWAYS** reset global state on navigation to prevent stale data
+- **ALWAYS** implement proper loading states for async operations
+
+## 🎯 BUSINESS LOGIC RULES (DOMAIN-SPECIFIC)
+
+### Service Types (ENFORCED)
+- **Landing Pages**: 48-hour delivery, ₱9,999-25,999
+- **Full Websites**: 5 days - 3 weeks, ₱19,999-89,999
+- **Mobile Apps**: 4-12 weeks, ₱89,999-999,999
+
+### Onboarding Flow (MANDATORY)
+- **ALWAYS** capture: service type, project details, contact info
+- **ALWAYS** implement comprehensive form validation
+- **ALWAYS** provide clear pricing information
+- **ALWAYS** include add-on options (AI chat, SEO, maintenance)
+
+## 🚫 WHAT NOT TO DO (FORBIDDEN)
+
+### Technology Choices (NEVER)
+- **NEVER** use Pages Router (App Router only)
+- **NEVER** use npm or yarn (pnpm only)
+- **NEVER** use CSS-in-JS libraries (Tailwind only)
+- **NEVER** use other state management libraries (Zustand only)
+- **NEVER** use other form libraries (React Hook Form only)
+
+### Code Patterns (FORBIDDEN)
+- **NEVER** create custom CSS when Tailwind classes exist
+- **NEVER** implement custom validation when Zod schema exists
+- **NEVER** create custom animations when Framer Motion patterns exist
+- **NEVER** bypass TypeScript type checking
+- **NEVER** ignore accessibility requirements
+
+### File Structure (FORBIDDEN)
+- **NEVER** place components in wrong directories
+- **NEVER** use inconsistent naming conventions
+- **NEVER** create unnecessary nested directories
+- **NEVER** ignore the established component architecture
+
+## ✅ ENFORCEMENT CHECKLIST
+
+Before completing any task, verify:
+- [ ] Follows Next.js 15 + App Router patterns
+- [ ] Uses correct tech stack (Tailwind, Zustand, RHF, Zod, Framer)
+- [ ] Implements proper TypeScript typing
+- [ ] Includes dark mode support
+- [ ] Follows naming conventions
+- [ ] Includes proper accessibility
+- [ ] Implements error handling
+- [ ] Optimizes for performance
+- [ ] Maintains business logic consistency
+- [ ] Passes all linting rules
+
+## 🔄 CONTINUOUS IMPROVEMENT
+
+### Code Review Standards (MANDATORY)
+- **ALWAYS** review for adherence to these rules
+- **ALWAYS** check business logic alignment
+- **ALWAYS** verify accessibility compliance
+- **ALWAYS** test across different devices
+- **ALWAYS** validate performance impact
+
+### Documentation Updates (REQUIRED)
+- **Update these rules** when patterns change
+- **Document new patterns** that emerge
+- **Share learnings** across the team
+- **Maintain consistency** with business requirements
+
+---
+
+**Remember**: These rules ensure consistency, maintainability, and alignment with Lunaxcode's business goals. Every code change should enhance the user experience for Filipino SMEs seeking rapid web development solutions.

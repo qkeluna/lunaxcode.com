@@ -474,7 +474,7 @@ export default function AddOnsManagement() {
                   data={addons}
                   columns={columns}
                   searchKey="name"
-                  placeholder="Search add-on services..."
+                  searchPlaceholder="Search add-on services..."
                 />
               )}
             </CardContent>

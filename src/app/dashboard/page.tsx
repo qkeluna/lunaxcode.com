@@ -1,18 +1,19 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
-import { AdminLoginForm } from "@/components/admin-login-form";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function AdminPage() {
+export default function DashboardPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isPending && session) {
-      // Redirect to dashboard if already logged in
-      router.push('/dashboard');
+    if (!isPending && !session) {
+      router.push('/admin');
+    } else if (session) {
+      // Redirect to the new admin dashboard
+      router.push('/admin/dashboard');
     }
   }, [session, isPending, router]);
 
@@ -24,14 +25,10 @@ export default function AdminPage() {
     );
   }
 
-  if (session) {
-    return null; // Will redirect to dashboard
-  }
-
   return (
-    <div className="bg-muted min-h-screen flex flex-col items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm md:max-w-3xl">
-        <AdminLoginForm />
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <p>Redirecting to admin dashboard...</p>
       </div>
     </div>
   );

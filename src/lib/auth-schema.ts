@@ -45,3 +45,49 @@ export const verification = sqliteTable("verification", {
   createdAt: integer("created_at", { mode: "timestamp" }),
   updatedAt: integer("updated_at", { mode: "timestamp" }),
 });
+
+export const onboardingSubmission = sqliteTable("onboarding_submission", {
+  id: text("id").primaryKey(),
+  
+  // Basic Information (common to all services)
+  projectName: text("project_name").notNull(),
+  companyName: text("company_name"),
+  industry: text("industry"),
+  description: text("description"),
+  
+  // Contact Information
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  preferredContact: text("preferred_contact"),
+  
+  // Service Information
+  serviceType: text("service_type").notNull(), // 'landing_page', 'web_app', 'mobile_app'
+  budget: text("budget"),
+  timeline: text("timeline"),
+  urgency: text("urgency"),
+  
+  // Service-specific fields (stored as JSON)
+  serviceSpecificData: text("service_specific_data", { mode: "json" }),
+  
+  // Additional Requirements
+  additionalRequirements: text("additional_requirements"),
+  inspiration: text("inspiration"),
+  
+  // Add-ons
+  addOns: text("add_ons", { mode: "json" }), // Array of selected add-ons
+  
+  // Status and tracking
+  status: text("status").notNull().default("pending"), // 'pending', 'in-progress', 'completed', 'rejected'
+  priority: text("priority").default("medium"), // 'low', 'medium', 'high', 'urgent'
+  assignedTo: text("assigned_to"), // User ID of assigned team member
+  
+  // Notes and communication
+  internalNotes: text("internal_notes"),
+  clientNotes: text("client_notes"),
+  
+  // Timestamps
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  completedAt: integer("completed_at", { mode: "timestamp" }),
+});

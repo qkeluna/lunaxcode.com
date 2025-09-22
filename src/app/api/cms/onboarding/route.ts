@@ -1,0 +1,173 @@
+import { NextRequest } from 'next/server';
+import { eq, and, like, or, desc, sql } from 'drizzle-orm';
+import { getLocalDB } from '@/lib/db';
+import { onboardingSubmission } from '@/lib/schema';
+import { createApiResponse, createErrorResponse, withAuth } from '@/lib/auth';
+import { 
+  OnboardingSubmissionCreateRequest, 
+  OnboardingSubmissionUpdateRequest,
+  OnboardingSubmissionFilters 
+} from '@/types/onboarding';
+import { randomUUID } from 'crypto';
+
+// GET /api/cms/onboarding - Get all onboarding submissions with filtering
+export const GET = withAuth(async (request: NextRequest) => {
+  try {
+    const db = getLocalDB();
+    const url = new URL(request.url);
+    const searchParams = url.searchParams;
+    
+    // Parse query parameters
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = (page - 1) * limit;
+    
+    const filters: OnboardingSubmissionFilters = {
+      serviceType: searchParams.get('serviceType') as any,
+      status: searchParams.get('status') as any,
+      priority: searchParams.get('priority') as any,
+      assignedTo: searchParams.get('assignedTo') || undefined,
+      dateFrom: searchParams.get('dateFrom') || undefined,
+      dateTo: searchParams.get('dateTo') || undefined,
+      search: searchParams.get('search') || undefined,
+    };
+    
+    // Build where conditions
+    const whereConditions = [];
+    
+    if (filters.serviceType) {
+      whereConditions.push(eq(onboardingSubmission.serviceType, filters.serviceType));
+    }
+    
+    if (filters.status) {
+      whereConditions.push(eq(onboardingSubmission.status, filters.status));
+    }
+    
+    if (filters.priority) {
+      whereConditions.push(eq(onboardingSubmission.priority, filters.priority));
+    }
+    
+    if (filters.assignedTo) {
+      whereConditions.push(eq(onboardingSubmission.assignedTo, filters.assignedTo));
+    }
+    
+    if (filters.dateFrom) {
+      whereConditions.push(sql`${onboardingSubmission.createdAt} >= ${filters.dateFrom}`);
+    }
+    
+    if (filters.dateTo) {
+      whereConditions.push(sql`${onboardingSubmission.createdAt} <= ${filters.dateTo}`);
+    }
+    
+    if (filters.search) {
+      whereConditions.push(
+        or(
+          like(onboardingSubmission.projectName, `%${filters.search}%`),
+          like(onboardingSubmission.companyName, `%${filters.search}%`),
+          like(onboardingSubmission.email, `%${filters.search}%`),
+          like(onboardingSubmission.name, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+    
+    // Get total count
+    const [totalResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(onboardingSubmission)
+      .where(whereClause);
+    
+    const total = totalResult.count;
+    
+    // Get submissions with pagination
+    const submissions = await db
+      .select()
+      .from(onboardingSubmission)
+      .where(whereClause)
+      .orderBy(desc(onboardingSubmission.createdAt))
+      .limit(limit)
+      .offset(offset);
+    
+    // Parse JSON fields and format timestamps
+    const formattedSubmissions = submissions.map(submission => ({
+      ...submission,
+      createdAt: submission.createdAt ? new Date(submission.createdAt) : undefined,
+      updatedAt: submission.updatedAt ? new Date(submission.updatedAt) : undefined,
+      completedAt: submission.completedAt ? new Date(submission.completedAt) : undefined,
+      serviceSpecificData: submission.serviceSpecificData ? JSON.parse(submission.serviceSpecificData) : undefined,
+      addOns: submission.addOns ? JSON.parse(submission.addOns) : undefined,
+    }));
+    
+    return createApiResponse({
+      submissions: formattedSubmissions,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error('Error fetching onboarding submissions:', error);
+    return createErrorResponse('Failed to fetch onboarding submissions', 500);
+  }
+});
+
+// POST /api/cms/onboarding - Create new onboarding submission (public endpoint, no auth required)
+export async function POST(request: NextRequest) {
+  try {
+    const body: OnboardingSubmissionCreateRequest = await request.json();
+    
+    // Validate required fields
+    if (!body.projectName || !body.name || !body.email || !body.serviceType) {
+      return createErrorResponse('Missing required fields: projectName, name, email, serviceType', 400);
+    }
+    
+    const db = getLocalDB();
+    const now = new Date().toISOString();
+    const id = randomUUID();
+    
+    const submissionData = {
+      id,
+      projectName: body.projectName,
+      companyName: body.companyName || null,
+      industry: body.industry || null,
+      description: body.description || null,
+      name: body.name,
+      email: body.email,
+      phone: body.phone || null,
+      preferredContact: body.preferredContact || null,
+      serviceType: body.serviceType,
+      budget: body.budget || null,
+      timeline: body.timeline || null,
+      urgency: body.urgency || null,
+      serviceSpecificData: body.serviceSpecificData ? JSON.stringify(body.serviceSpecificData) : null,
+      additionalRequirements: body.additionalRequirements || null,
+      inspiration: body.inspiration || null,
+      addOns: body.addOns ? JSON.stringify(body.addOns) : null,
+      status: 'pending' as const,
+      priority: 'medium' as const,
+      assignedTo: null,
+      internalNotes: null,
+      clientNotes: null,
+      createdAt: now,
+      updatedAt: now,
+      completedAt: null,
+    };
+    
+    await db.insert(onboardingSubmission).values(submissionData);
+    
+    // Return the created submission with proper formatting
+    const formattedSubmission = {
+      ...submissionData,
+      createdAt: new Date(now),
+      updatedAt: new Date(now),
+      serviceSpecificData: body.serviceSpecificData,
+      addOns: body.addOns,
+    };
+    
+    return createApiResponse(formattedSubmission, 201);
+  } catch (error) {
+    console.error('Error creating onboarding submission:', error);
+    return createErrorResponse('Failed to create onboarding submission', 500);
+  }
+}

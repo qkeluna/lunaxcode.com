@@ -5,10 +5,12 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Menu, X } from "lucide-react";
+import { useOnboardingStore } from "@/lib/store";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { openModal } = useOnboardingStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,17 +22,9 @@ export function Header() {
   }, []);
 
   const scrollToSection = (sectionId: string) => {
-    console.log('Attempting to scroll to section:', sectionId);
     const element = document.getElementById(sectionId);
-    console.log('Element found:', element);
     if (element) {
-      // Add a small delay to ensure mobile menu closes first
-      setTimeout(() => {
-        element.scrollIntoView({ 
-          behavior: "smooth",
-          block: "start"
-        });
-      }, 100);
+      element.scrollIntoView({ behavior: "smooth" });
     }
     setIsMobileMenuOpen(false);
   };
@@ -61,8 +55,8 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {[
-              { name: "Services", id: "services" },
-              { name: "Pricing", id: "pricing" },
+              { name: "Features", id: "features" },
+              { name: "Services", id: "pricing" },
               { name: "Process", id: "process" },
               { name: "Contact", id: "contact" },
             ].map((item) => (
@@ -82,13 +76,15 @@ export function Header() {
             ))}
           </nav>
 
-          {/* CTA Button */}
+          {/* CTA Button & Theme Toggle */}
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle variant="header" isScrolled={isScrolled} />
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                onClick={() => scrollToSection("pricing")}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={() => openModal("landing_page")}
+                variant={isScrolled ? "default" : "secondary"}
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0"
               >
                 Get Started
               </Button>
@@ -120,13 +116,13 @@ export function Header() {
           >
             <div className="py-6 px-4 space-y-2">
               {[
-                { name: "Services", id: "services" },
-                { name: "Pricing", id: "pricing" },
+                { name: "Features", id: "features" },
+                { name: "Services", id: "pricing" },
                 { name: "Process", id: "process" },
                 { name: "Contact", id: "contact" },
               ].map((item) => (
                 <button
-                  key={item.id}
+                  key={item.name}
                   onClick={() => scrollToSection(item.id)}
                   className="flex w-full text-left px-6 py-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200 cursor-pointer min-h-[48px] items-center"
                   style={{ touchAction: 'manipulation' }}
@@ -139,8 +135,11 @@ export function Header() {
                   <ThemeToggle variant="mobile" />
                 </div>
                 <Button
-                  onClick={() => scrollToSection("pricing")}
-                  className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-4 rounded-lg transition-all duration-200 min-h-[48px]"
+                  onClick={() => {
+                    openModal("landing_page");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-4 min-h-[48px] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0"
                 >
                   Get Started
                 </Button>

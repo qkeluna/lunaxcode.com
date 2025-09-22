@@ -167,20 +167,67 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    try {
+      // Combine all form data
+      const finalFormData = {
+        ...formData,
+        ...basicInfoForm.getValues(),
+        ...serviceSpecificForm.getValues()
+      };
 
-    const refNumber = 'LXC' + Date.now().toString().slice(-6);
-    console.log('Project submitted:', {
-      service: selectedService,
-      serviceDetails: serviceDetails[selectedService as keyof typeof serviceDetails],
-      formData: { ...formData, ...serviceSpecificForm.getValues() },
-      referenceNumber: refNumber,
-      timestamp: new Date().toISOString(),
-    });
+      // Map form fields to API fields
+      const submissionData = {
+        projectName: finalFormData.projectName,
+        companyName: finalFormData.companyName,
+        industry: finalFormData.industry,
+        description: finalFormData.projectDescription,
+        name: finalFormData.companyName, // Using company name as contact name for now
+        email: finalFormData.contactEmail,
+        phone: finalFormData.contactPhone,
+        preferredContact: 'email', // Default to email
+        serviceType: serviceMapping[selectedService as keyof typeof serviceMapping] as 'landing_page' | 'web_app' | 'mobile_app',
+        budget: serviceDetails[selectedService as keyof typeof serviceDetails]?.price,
+        timeline: serviceDetails[selectedService as keyof typeof serviceDetails]?.timeline,
+        urgency: 'medium', // Default urgency
+        serviceSpecificData: {
+          originalService: selectedService,
+          serviceDetails: serviceDetails[selectedService as keyof typeof serviceDetails],
+          ...serviceSpecificForm.getValues()
+        },
+        additionalRequirements: finalFormData.projectDescription,
+        addOns: [], // No add-ons selected in current form
+      };
 
-    setIsSubmitting(false);
-    setCurrentStep(6); // Success step
+      // Submit to API
+      const response = await fetch('/api/cms/onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit project request');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Store the submission ID for reference
+        setFormData({ ...formData, submissionId: result.data.id });
+        setCurrentStep(5); // Success step
+      } else {
+        throw new Error(result.error || 'Failed to submit project request');
+      }
+    } catch (error) {
+      console.error('Error submitting project:', error);
+      // You could add a toast notification here
+      alert('Failed to submit project request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetModal = () => {
@@ -621,7 +668,7 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
               <div className="bg-blue-50 p-4 sm:p-6 rounded-xl">
                 <h4 className="font-semibold text-blue-800 mb-2">Your Reference Number</h4>
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">
-                  LXC{Date.now().toString().slice(-6)}
+                  {formData.submissionId ? `LXC-${(formData.submissionId as string).slice(-8).toUpperCase()}` : `LXC${Date.now().toString().slice(-6)}`}
                 </div>
                 <p className="text-sm text-blue-600 mt-2">
                   Keep this number for your records

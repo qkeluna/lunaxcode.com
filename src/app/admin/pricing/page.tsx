@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import { useRouter } from 'next/navigation';
+import { useSession } from "@/lib/auth-client";
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { LunaxcodeAppSidebar } from '@/components/admin/LunaxcodeAppSidebar';
+import { LunaxcodeSiteHeader } from '@/components/admin/LunaxcodeSiteHeader';
+import { LunaxcodeSiteFooter } from '@/components/admin/LunaxcodeSiteFooter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,14 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { AdvancedDataTable, createSortableColumn } from '@/components/ui/advanced-data-table';
+import { ColumnDef } from '@tanstack/react-table';
 import { 
   Dialog,
   DialogContent,
@@ -27,7 +26,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Edit, Trash2, Star, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Star, Loader2, AlertCircle, Trash2 } from 'lucide-react';
 
 interface PricingPlan {
   id: string;
@@ -60,6 +59,8 @@ const initialPlanData: Omit<PricingPlan, 'createdAt' | 'updatedAt'> = {
 };
 
 export default function PricingManagement() {
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -71,6 +72,12 @@ export default function PricingManagement() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!isPending && !session) {
+      router.push('/admin');
+    }
+  }, [session, isPending, router]);
+
+  useEffect(() => {
     fetchPlans();
   }, []);
 
@@ -79,8 +86,8 @@ export default function PricingManagement() {
       const response = await fetch('/api/cms/pricing');
       if (!response.ok) throw new Error('Failed to fetch pricing plans');
       
-      const data = await response.json();
-      setPlans(data);
+      const result = await response.json();
+      setPlans(result.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch pricing plans');
     } finally {
@@ -94,16 +101,15 @@ export default function PricingManagement() {
     setError('');
 
     try {
-      const token = localStorage.getItem('cms_token');
-      if (!token) throw new Error('No authentication token');
+      if (!session) throw new Error('No authentication token');
 
       const method = editingPlan ? 'PUT' : 'POST';
       const response = await fetch('/api/cms/pricing', {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include', // This ensures cookies are sent with the request
         body: JSON.stringify(formData),
       });
 
@@ -134,14 +140,11 @@ export default function PricingManagement() {
     if (!confirm('Are you sure you want to delete this pricing plan?')) return;
 
     try {
-      const token = localStorage.getItem('cms_token');
-      if (!token) throw new Error('No authentication token');
+      if (!session) throw new Error('No authentication token');
 
       const response = await fetch(`/api/cms/pricing?id=${planId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // This ensures cookies are sent with the request
       });
 
       if (!response.ok) {
@@ -166,6 +169,49 @@ export default function PricingManagement() {
     }
   };
 
+  // Define columns for the advanced data table
+  const columns: ColumnDef<PricingPlan>[] = [
+    {
+      accessorKey: "name",
+      header: "Plan",
+      cell: ({ row }) => (
+        <div className="flex items-center space-x-2">
+          <div>
+            <div className="font-medium">{row.original.name}</div>
+            <div className="text-sm text-gray-500">{row.original.description}</div>
+          </div>
+          {row.original.popular && (
+            <Badge variant="secondary" className="ml-2">
+              <Star className="mr-1 h-3 w-3" />
+              Popular
+            </Badge>
+          )}
+        </div>
+      ),
+    },
+    createSortableColumn<PricingPlan>("price", "Price"),
+    createSortableColumn<PricingPlan>("timeline", "Timeline"),
+    {
+      accessorKey: "features",
+      header: "Features",
+      cell: ({ row }) => (
+        <div className="text-sm text-gray-500">
+          {row.original.features.length} feature{row.original.features.length !== 1 ? 's' : ''}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "isActive",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
+          {row.original.isActive ? 'Active' : 'Inactive'}
+        </Badge>
+      ),
+    },
+    createSortableColumn<PricingPlan>("displayOrder", "Order"),
+  ];
+
   const removeFeature = (index: number) => {
     setFormData(prev => ({
       ...prev,
@@ -180,18 +226,41 @@ export default function PricingManagement() {
     setNewFeature('');
   };
 
+  if (isPending) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
+
   if (loading) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </AdminLayout>
+      <SidebarProvider>
+        <LunaxcodeAppSidebar />
+        <SidebarInset>
+          <LunaxcodeSiteHeader />
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0 min-h-0">
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          </div>
+          <LunaxcodeSiteFooter />
+        </SidebarInset>
+      </SidebarProvider>
     );
   }
 
   return (
-    <AdminLayout>
+    <SidebarProvider>
+      <LunaxcodeAppSidebar />
+      <SidebarInset>
+        <LunaxcodeSiteHeader />
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 min-h-0">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -406,85 +475,38 @@ export default function PricingManagement() {
         {/* Plans Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Pricing Plans ({plans.length})</CardTitle>
+            <CardTitle>Pricing Plans ({Array.isArray(plans) ? plans.length : 0})</CardTitle>
           </CardHeader>
           <CardContent>
-            {plans.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">No pricing plans found.</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-                  Create your first pricing plan to get started.
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Timeline</TableHead>
-                    <TableHead>Features</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {plans
-                    .toSorted((a, b) => a.displayOrder - b.displayOrder)
-                    .map((plan) => (
-                    <TableRow key={plan.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <div>
-                            <div className="font-medium">{plan.name}</div>
-                            <div className="text-sm text-gray-500">{plan.description}</div>
-                          </div>
-                          {plan.popular && (
-                            <Badge variant="secondary" className="ml-2">
-                              <Star className="mr-1 h-3 w-3" />
-                              Popular
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{plan.price}</TableCell>
-                      <TableCell>{plan.timeline}</TableCell>
-                      <TableCell>
-                        <div className="text-sm text-gray-500">
-                          {plan.features.length} feature{plan.features.length !== 1 ? 's' : ''}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={plan.isActive ? 'default' : 'secondary'}>
-                          {plan.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(plan)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(plan.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+            <AdvancedDataTable
+              columns={columns}
+              data={Array.isArray(plans) ? plans.slice().sort((a, b) => a.displayOrder - b.displayOrder) : []}
+              searchKey="name"
+              searchPlaceholder="Search pricing plans..."
+              enableRowSelection={true}
+              enableColumnVisibility={true}
+              enablePagination={true}
+              enableSorting={true}
+              enableFiltering={true}
+              actions={[
+                {
+                  label: "Edit Plan",
+                  onClick: (plan) => handleEdit(plan),
+                  variant: "default",
+                },
+                {
+                  label: "Delete Plan",
+                  onClick: (plan) => handleDelete(plan.id),
+                  variant: "destructive",
+                },
+              ]}
+            />
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+        </div>
+        <LunaxcodeSiteFooter />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
