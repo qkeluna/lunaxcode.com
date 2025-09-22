@@ -30,6 +30,7 @@
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:dev": "npx @cloudflare/next-on-pages --dev",
     "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static",
+    "build:cloudflare": "bash scripts/cloudflare-build.sh",
     "cloudflare:enable-edge": "find src/app/api -name 'route.ts' -exec sed -i '' 's|\\/\\/ export const runtime = '\\''edge'\\''\\;|export const runtime = '\\''edge'\\''\\;|' {} \\;",
     "cloudflare:disable-edge": "find src/app/api -name 'route.ts' -exec sed -i '' 's|export const runtime = '\\''edge'\\''\\;|\\/\\/ export const runtime = '\\''edge'\\''\\;|' {} \\;"
   },
