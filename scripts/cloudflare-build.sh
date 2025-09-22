@@ -16,8 +16,13 @@ find src/app/api -name 'route.ts' -exec sed -i '' 's|// // export const runtime 
 
 echo "✅ Edge Runtime enabled for Cloudflare compatibility"
 
-# Build the application with Cloudflare-specific settings
-echo "🏗️ Building Next.js application for Cloudflare Pages..."
+# Build the Next.js application first
+echo "🏗️ Building Next.js application..."
 pnpm build
 
-echo "🎉 Build completed successfully!"
+# Convert the build for Cloudflare Pages using next-on-pages
+echo "🔄 Converting build for Cloudflare Pages..."
+npx @cloudflare/next-on-pages
+
+echo "🎉 Cloudflare Pages build completed successfully!"
+echo "📁 Output directory: .vercel/output/static"
