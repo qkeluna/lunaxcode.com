@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import { eq, and, like, or, desc, sql } from 'drizzle-orm';
 import { onboardingSubmission } from '@/lib/schema';
 import { createApiResponse, createErrorResponse, withAuth } from '@/lib/auth';
+
+// Dynamic runtime selection for better environment compatibility  
+export const runtime = 'edge';
 import { 
   OnboardingSubmissionCreateRequest, 
   OnboardingSubmissionFilters,
@@ -9,7 +12,18 @@ import {
   SubmissionStatus,
   SubmissionPriority
 } from '@/types/onboarding';
-import { randomUUID } from 'crypto';
+// Use Web API crypto for Edge Runtime compatibility
+const randomUUID = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 // GET /api/cms/onboarding - Get all onboarding submissions with filtering
 export const GET = withAuth(async (request: NextRequest) => {

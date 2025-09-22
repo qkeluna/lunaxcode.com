@@ -5,6 +5,9 @@ import { getLocalDB } from '@/lib/db';
 import { cmsUsers } from '@/lib/schema';
 import { generateToken, createApiResponse, createErrorResponse } from '@/lib/auth';
 
+// Enable Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
+
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();

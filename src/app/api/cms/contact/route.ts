@@ -5,6 +5,9 @@ import { contactInfo } from '@/lib/schema';
 import { withAuth, createApiResponse, createErrorResponse } from '@/lib/auth';
 import { z } from 'zod';
 
+// Enable Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
+
 const contactSchema = z.object({
   id: z.number().optional(),
   type: z.enum(['email', 'phone', 'address', 'social']),

@@ -5,6 +5,9 @@ import { features } from '@/lib/schema';
 import { withAuth, createApiResponse, createErrorResponse } from '@/lib/auth';
 import { z } from 'zod';
 
+// Enable Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
+
 const featureSchema = z.object({
   id: z.number().optional(),
   title: z.string().min(1),

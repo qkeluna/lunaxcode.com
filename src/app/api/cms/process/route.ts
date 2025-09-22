@@ -5,6 +5,9 @@ import { processSteps } from '@/lib/schema';
 import { withAuth, createApiResponse, createErrorResponse } from '@/lib/auth';
 import { z } from 'zod';
 
+// Enable Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
+
 const processStepSchema = z.object({
   id: z.number().optional(),
   stepNumber: z.number().min(1),

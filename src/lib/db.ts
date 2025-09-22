@@ -35,13 +35,8 @@ export function getDatabaseInstance(): ReturnType<typeof getDB> | ReturnType<typ
     }
   }
   
-  // Check for Next.js Edge Runtime with D1 binding
-  if (typeof process !== 'undefined' && process.env.NODE_ENV !== undefined) {
-    // We're in Node.js environment (local development or traditional deployment)
-    return getLocalDB();
-  }
-  
-  // Fallback to local DB
+  // For all other environments, use local DB
+  // In production on Cloudflare, the middleware will provide D1 bindings
   return getLocalDB();
 }
 

@@ -5,6 +5,9 @@ import { pricingPlans } from '@/lib/schema';
 import { withAuth, createApiResponse, createErrorResponse } from '@/lib/auth';
 import { z } from 'zod';
 
+// Enable Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
+
 const pricingPlanSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),

@@ -5,6 +5,9 @@ import { faqs } from '@/lib/schema';
 import { withAuth, createApiResponse, createErrorResponse } from '@/lib/auth';
 import { z } from 'zod';
 
+// Enable Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
+
 const faqSchema = z.object({
   id: z.number().optional(),
   question: z.string().min(1),

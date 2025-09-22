@@ -4,6 +4,9 @@ import { onboardingSubmission } from '@/lib/schema';
 import { createApiResponse, createErrorResponse, withAuth } from '@/lib/auth';
 import { OnboardingSubmissionUpdateRequest } from '@/types/onboarding';
 
+// Enable Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
+
 // GET /api/cms/onboarding/[id] - Get specific onboarding submission
 export const GET = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
