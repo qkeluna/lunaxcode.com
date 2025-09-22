@@ -17,6 +17,7 @@ const pricingPlanSchema = z.object({
   popular: z.boolean(),
   timeline: z.string().min(1),
   displayOrder: z.number().min(0),
+  category: z.string().optional().default('web'),
   isActive: z.boolean(),
 });
 

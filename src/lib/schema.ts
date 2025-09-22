@@ -14,6 +14,23 @@ export const pricingPlans = sqliteTable('pricing_plans', {
   popular: integer('popular', { mode: 'boolean' }).notNull().default(false),
   timeline: text('timeline').notNull(),
   displayOrder: integer('display_order').notNull().default(0),
+  category: text('category').default('web'), // web, mobile
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Add-On Services table
+export const addOnServices = sqliteTable('addon_services', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  price: text('price').notNull(),
+  description: text('description').notNull(),
+  unit: text('unit'), // per page, per month, one-time, etc.
+  category: text('category').default('general'), // general, seo, maintenance, integration
+  icon: text('icon'), // Lucide icon name
+  popular: integer('popular', { mode: 'boolean' }).notNull().default(false),
+  displayOrder: integer('display_order').notNull().default(0),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
@@ -150,6 +167,9 @@ export const formSubmissions = sqliteTable('form_submissions', {
 export type PricingPlan = typeof pricingPlans.$inferSelect;
 export type NewPricingPlan = typeof pricingPlans.$inferInsert;
 
+export type AddOnService = typeof addOnServices.$inferSelect;
+export type NewAddOnService = typeof addOnServices.$inferInsert;
+
 export type Feature = typeof features.$inferSelect;
 export type NewFeature = typeof features.$inferInsert;
 
@@ -177,49 +197,49 @@ export type NewCMSUser = typeof cmsUsers.$inferInsert;
 export type FormSubmission = typeof formSubmissions.$inferSelect;
 export type NewFormSubmission = typeof formSubmissions.$inferInsert;
 
-// Better Auth tables
-export const user = sqliteTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
-  image: text("image"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-});
-
-export const session = sqliteTable("session", {
-  id: text("id").primaryKey(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-});
-
-export const account = sqliteTable("account", {
-  id: text("id").primaryKey(),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: integer("access_token_expires_at", { mode: "timestamp" }),
-  refreshTokenExpiresAt: integer("refresh_token_expires_at", { mode: "timestamp" }),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-});
-
-export const verification = sqliteTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }),
-  updatedAt: integer("updated_at", { mode: "timestamp" }),
+// Onboarding Submissions table
+export const onboardingSubmission = sqliteTable('onboarding_submission', {
+  id: text('id').primaryKey(),
+  
+  // Basic Information (common to all services)
+  projectName: text('project_name').notNull(),
+  companyName: text('company_name'),
+  industry: text('industry'),
+  description: text('description'),
+  
+  // Contact Information
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone'),
+  preferredContact: text('preferred_contact'),
+  
+  // Service Information
+  serviceType: text('service_type').notNull(), // 'landing_page', 'web_app', 'mobile_app'
+  budget: text('budget'),
+  timeline: text('timeline'),
+  urgency: text('urgency'),
+  
+  // Service-specific fields (stored as JSON)
+  serviceSpecificData: text('service_specific_data'),
+  
+  // Additional Requirements
+  additionalRequirements: text('additional_requirements'),
+  inspiration: text('inspiration'),
+  
+  // Add-ons
+  addOns: text('add_ons'), // JSON array of selected add-ons
+  
+  // Status and tracking
+  status: text('status').notNull().default('pending'), // 'pending', 'in-progress', 'completed', 'rejected'
+  priority: text('priority').default('medium'), // 'low', 'medium', 'high', 'urgent'
+  assignedTo: text('assigned_to'), // User ID of assigned team member
+  
+  // Notes and communication
+  internalNotes: text('internal_notes'),
+  clientNotes: text('client_notes'),
+  
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  completedAt: text('completed_at'),
 });

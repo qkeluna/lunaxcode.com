@@ -22,6 +22,7 @@ interface PricingPlan {
   timeline: string;
   displayOrder: number;
   category?: string;
+  isActive: boolean;
 }
 
 interface AddOnService {
@@ -30,204 +31,64 @@ interface AddOnService {
   price: string;
   description: string;
   unit?: string;
+  category?: string;
+  icon?: string;
+  popular: boolean;
+  displayOrder: number;
+  isActive: boolean;
 }
-
-// Static data for fallback
-const webDevelopmentPlans = [
-  {
-    id: "landing_page",
-    name: "Landing Page",
-    price: "₱9,999",
-    period: "- ₱25,999",
-    description: "Perfect for startups and small businesses",
-    features: [
-      "48-hour delivery guaranteed",
-      "1 professional responsive page",
-      "AI chat widget integration",
-      "Basic SEO optimization",
-      "Google Analytics setup",
-      "Mobile-first design",
-      "1 round of revisions"
-    ],
-    buttonText: "Get Started",
-    buttonVariant: "gradient",
-    popular: true,
-    timeline: "48 hours",
-    displayOrder: 1,
-    category: "web"
-  },
-  {
-    id: "basic_website",
-    name: "Basic Website",
-    price: "₱19,999",
-    period: "- ₱39,999",
-    description: "Ideal for growing businesses",
-    features: [
-      "5-7 days delivery",
-      "3-5 static pages",
-      "AI chat widget",
-      "SEO optimization",
-      "Contact forms",
-      "Analytics integration",
-      "2 rounds of revisions",
-      "Basic blog setup"
-    ],
-    buttonText: "Choose Plan",
-    buttonVariant: "outline",
-    popular: false,
-    timeline: "5-7 days",
-    displayOrder: 2,
-    category: "web"
-  },
-  {
-    id: "advanced_website",
-    name: "Advanced Website",
-    price: "₱49,999",
-    period: "- ₱89,999",
-    description: "For established businesses",
-    features: [
-      "2-3 weeks delivery",
-      "8-12 pages with CMS",
-      "Advanced AI features",
-      "E-commerce ready",
-      "Blog setup",
-      "Advanced SEO & analytics",
-      "3 rounds of revisions",
-      "Performance optimization"
-    ],
-    buttonText: "Choose Plan",
-    buttonVariant: "outline",
-    popular: false,
-    timeline: "2-3 weeks",
-    displayOrder: 3,
-    category: "web"
-  }
-];
-
-const mobileAppPlans = [
-  {
-    id: "basic_mobile_app",
-    name: "Basic Mobile App",
-    price: "₱89,999",
-    period: "- ₱199,999",
-    description: "Cross-platform mobile solution",
-    features: [
-      "4-6 weeks delivery",
-      "iOS & Android compatible",
-      "Basic AI integration",
-      "User authentication",
-      "Push notifications",
-      "App store submission",
-      "3 months support",
-      "Basic analytics"
-    ],
-    buttonText: "Get Quote",
-    buttonVariant: "outline",
-    popular: false,
-    timeline: "4-6 weeks",
-    displayOrder: 1,
-    category: "mobile"
-  },
-  {
-    id: "advanced_mobile_app",
-    name: "Advanced Mobile App",
-    price: "₱299,999",
-    period: "- ₱999,999",
-    description: "Enterprise-grade mobile application",
-    features: [
-      "8-12 weeks delivery",
-      "Advanced AI features",
-      "Backend API development",
-      "Real-time features",
-      "Advanced security",
-      "Custom integrations",
-      "6 months support",
-      "Advanced analytics & reporting"
-    ],
-    buttonText: "Get Quote",
-    buttonVariant: "gradient",
-    popular: true,
-    timeline: "8-12 weeks",
-    displayOrder: 2,
-    category: "mobile"
-  }
-];
-
-const addOnServices: AddOnService[] = [
-  {
-    id: "additional_pages",
-    name: "Additional Pages",
-    price: "₱1,999",
-    description: "Extra pages for your website",
-    unit: "per page"
-  },
-  {
-    id: "ai_content_generation",
-    name: "AI Content Generation",
-    price: "₱4,999",
-    description: "AI-powered content creation",
-    unit: "per package"
-  },
-  {
-    id: "monthly_maintenance",
-    name: "Monthly Maintenance",
-    price: "₱3,999",
-    description: "Ongoing support and updates",
-    unit: "per month"
-  },
-  {
-    id: "seo_optimization",
-    name: "Advanced SEO Package",
-    price: "₱7,999",
-    description: "Comprehensive SEO optimization",
-    unit: "one-time"
-  },
-  {
-    id: "e_commerce_integration",
-    name: "E-commerce Integration",
-    price: "₱15,999",
-    description: "Payment gateway and shopping cart",
-    unit: "one-time"
-  },
-  {
-    id: "custom_integrations",
-    name: "Custom API Integration",
-    price: "₱9,999",
-    description: "Third-party service integrations",
-    unit: "per integration"
-  }
-];
 
 export function Pricing({ onGetStarted }: PricingProps) {
   const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([]);
+  const [addOnServices, setAddOnServices] = useState<AddOnService[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPricingPlans = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/cms/pricing');
-        if (response.ok) {
-          const plans = await response.json();
-          if (plans.length > 0) {
-            setPricingPlans(plans);
+        // Fetch pricing plans and add-ons in parallel
+        const [pricingResponse, addonsResponse] = await Promise.all([
+          fetch('/api/cms/pricing'),
+          fetch('/api/cms/addons')
+        ]);
+
+        // Handle pricing plans
+        if (pricingResponse.ok) {
+          const pricingResult = await pricingResponse.json();
+          if (pricingResult.success && pricingResult.data) {
+            setPricingPlans(pricingResult.data);
           } else {
-            // Fallback to static data if no plans in database
-            setPricingPlans([...webDevelopmentPlans, ...mobileAppPlans]);
+            console.warn('No pricing data available from API');
+            setPricingPlans([]);
           }
         } else {
-          // Fallback to static data on API error
-          setPricingPlans([...webDevelopmentPlans, ...mobileAppPlans]);
+          console.error('Failed to fetch pricing plans:', pricingResponse.status);
+          setPricingPlans([]);
+        }
+
+        // Handle add-ons
+        if (addonsResponse.ok) {
+          const addonsResult = await addonsResponse.json();
+          if (addonsResult.success && addonsResult.data) {
+            setAddOnServices(addonsResult.data);
+          } else {
+            console.warn('No add-ons data available from API');
+            setAddOnServices([]);
+          }
+        } else {
+          console.error('Failed to fetch add-ons:', addonsResponse.status);
+          setAddOnServices([]);
         }
       } catch (error) {
-        console.error('Error fetching pricing plans:', error);
-        // Fallback to static data
-        setPricingPlans([...webDevelopmentPlans, ...mobileAppPlans]);
+        console.error('Error fetching data:', error);
+        setPricingPlans([]);
+        setAddOnServices([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPricingPlans();
+    fetchData();
   }, []);
 
   const getButtonStyles = (plan: PricingPlan) => {
@@ -253,13 +114,14 @@ export function Pricing({ onGetStarted }: PricingProps) {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Separate plans by category, fallback to static data structure
-  const webPlans = pricingPlans.filter(plan => plan.category === 'web' || plan.id.includes('page') || plan.id.includes('website'));
-  const mobilePlans = pricingPlans.filter(plan => plan.category === 'mobile' || plan.id.includes('mobile') || plan.id.includes('app'));
+  // Filter only active plans and separate by category
+  const activePlans = pricingPlans.filter(plan => plan.isActive);
+  const webPlans = activePlans.filter(plan => plan.category === 'web' || plan.id.includes('page') || plan.id.includes('website'));
+  const mobilePlans = activePlans.filter(plan => plan.category === 'mobile' || plan.id.includes('mobile') || plan.id.includes('app'));
   
-  // Use static data if dynamic data doesn't have proper categories
-  const finalWebPlans = webPlans.length > 0 ? webPlans : webDevelopmentPlans;
-  const finalMobilePlans = mobilePlans.length > 0 ? mobilePlans : mobileAppPlans;
+  // Sort plans by display order
+  const finalWebPlans = webPlans.sort((a, b) => a.displayOrder - b.displayOrder);
+  const finalMobilePlans = mobilePlans.sort((a, b) => a.displayOrder - b.displayOrder);
 
   if (loading) {
     return (
@@ -305,6 +167,38 @@ export function Pricing({ onGetStarted }: PricingProps) {
                   <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Show empty state if no pricing data is available
+  if (!loading && pricingPlans.length === 0) {
+    return (
+      <section id="pricing" className="py-20 bg-gray-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <div className="text-center">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Pricing Plans
+            </h2>
+            <div className="max-w-md mx-auto">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-8 shadow-lg">
+                <div className="text-6xl mb-4">💰</div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  No Pricing Plans Available
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  Pricing information is currently being updated. Please check back soon or contact us directly.
+                </p>
+                <Button 
+                  onClick={() => window.location.href = 'mailto:hello@lunaxcode.com'}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Contact Us
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -526,52 +420,54 @@ export function Pricing({ onGetStarted }: PricingProps) {
         </motion.div>
 
         {/* Add-On Services Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Add-On Services
-            </h3>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Enhance your project with these additional features
-            </p>
-          </div>
+        {addOnServices.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mb-20"
+          >
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Add-On Services
+              </h3>
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                Enhance your project with these additional features
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {addOnServices.map((addon, index) => (
-              <motion.div
-                key={addon.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-md"
-              >
-                <div className="text-center">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    {addon.name}
-                  </h4>
-                  <div className="text-2xl font-bold text-blue-600 mb-2">
-                    {addon.price}
-                  </div>
-                  {addon.unit && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                      {addon.unit}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {addOnServices.filter(addon => addon.isActive).map((addon, index) => (
+                <motion.div
+                  key={addon.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-md"
+                >
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {addon.name}
+                    </h4>
+                    <div className="text-2xl font-bold text-blue-600 mb-2">
+                      {addon.price}
                     </div>
-                  )}
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    {addon.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+                    {addon.unit && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                        {addon.unit}
+                      </div>
+                    )}
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      {addon.description}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Payment Terms Section */}
         <motion.div
