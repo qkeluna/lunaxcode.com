@@ -9,10 +9,15 @@ echo "🔧 Configuring for Cloudflare Pages deployment..."
 export CF_PAGES=true
 export NODE_ENV=production
 
-# Enable edge runtime for all API routes
-echo "⚡ Enabling Edge Runtime for API routes..."
-find src/app/api -name 'route.ts' -exec sed -i '' 's|// export const runtime = '\''edge'\'';|export const runtime = '\''edge'\'';|' {} \;
-find src/app/api -name 'route.ts' -exec sed -i '' 's|// // export const runtime = '\''edge'\'';|export const runtime = '\''edge'\'';|' {} \;
+# Enable edge runtime for critical API routes only (to reduce bundle size)
+echo "⚡ Enabling Edge Runtime for critical API routes..."
+
+# Only enable Edge Runtime for CMS routes that need D1 database access
+find src/app/api/cms -name 'route.ts' -exec sed -i '' 's|// export const runtime = '\''edge'\'';|export const runtime = '\''edge'\'';|' {} \;
+find src/app/api/cms -name 'route.ts' -exec sed -i '' 's|// // export const runtime = '\''edge'\'';|export const runtime = '\''edge'\'';|' {} \;
+
+# Keep auth routes on Node.js runtime to avoid bundling better-auth in workers
+echo "🔒 Auth routes will use Node.js runtime to reduce bundle size"
 
 echo "✅ Edge Runtime enabled for Cloudflare compatibility"
 
