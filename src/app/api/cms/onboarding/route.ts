@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { eq, and, like, or, desc, sql } from 'drizzle-orm';
-import { getLocalDB } from '@/lib/db';
 import { onboardingSubmission } from '@/lib/schema';
 import { createApiResponse, createErrorResponse, withAuth } from '@/lib/auth';
 import { 
@@ -15,7 +14,8 @@ import { randomUUID } from 'crypto';
 // GET /api/cms/onboarding - Get all onboarding submissions with filtering
 export const GET = withAuth(async (request: NextRequest) => {
   try {
-    const db = getLocalDB();
+    const { getDatabaseInstance } = await import('@/lib/db');
+    const db = getDatabaseInstance();
     const url = new URL(request.url);
     const searchParams = url.searchParams;
     
@@ -74,19 +74,19 @@ export const GET = withAuth(async (request: NextRequest) => {
     
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
     
-    // Get total count
-    const [totalResult] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(onboardingSubmission)
-      .where(whereClause);
+    // Get total count - using simple approach for compatibility
+    const totalQuery = whereClause 
+      ? db.select().from(onboardingSubmission).where(whereClause)
+      : db.select().from(onboardingSubmission);
+    const allRecords = await totalQuery;
+    const total = allRecords.length;
     
-    const total = totalResult.count;
+    // Get submissions with pagination  
+    const submissionsQuery = whereClause
+      ? db.select().from(onboardingSubmission).where(whereClause)
+      : db.select().from(onboardingSubmission);
     
-    // Get submissions with pagination
-    const submissions = await db
-      .select()
-      .from(onboardingSubmission)
-      .where(whereClause)
+    const submissions = await submissionsQuery
       .orderBy(desc(onboardingSubmission.createdAt))
       .limit(limit)
       .offset(offset);
@@ -117,14 +117,14 @@ export const GET = withAuth(async (request: NextRequest) => {
 // POST /api/cms/onboarding - Create new onboarding submission (public endpoint, no auth required)
 export async function POST(request: NextRequest) {
   try {
+    const { getDatabaseInstance } = await import('@/lib/db');
+    const db = getDatabaseInstance();
     const body: OnboardingSubmissionCreateRequest = await request.json();
-    
+
     // Validate required fields
     if (!body.projectName || !body.name || !body.email || !body.serviceType) {
       return createErrorResponse('Missing required fields: projectName, name, email, serviceType', 400);
     }
-    
-    const db = getLocalDB();
     const now = new Date().toISOString();
     const id = randomUUID();
     

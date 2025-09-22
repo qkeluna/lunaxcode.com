@@ -5,10 +5,10 @@ compatibility_date = "2024-03-14"
 [[ d1_databases ]]
 binding = "DB"
 database_name = "lunaxcode-cms"
-database_id = "your-database-id-here"
+database_id = "86002821-13d0-48a5-afc7-058d02eb1412"
 
 [env.development]
 [[ env.development.d1_databases ]]
 binding = "DB"
 database_name = "lunaxcode-cms-dev"
-preview_database_id = "your-dev-database-id-here"
+preview_database_id = "4a51e91e-cb22-4b69-8441-cc17acabb520"

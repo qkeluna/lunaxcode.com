@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { getLocalDB } from '@/lib/db';
 import { onboardingSubmission } from '@/lib/schema';
 import { createApiResponse, createErrorResponse, withAuth } from '@/lib/auth';
 import { OnboardingSubmissionUpdateRequest } from '@/types/onboarding';
@@ -8,7 +7,8 @@ import { OnboardingSubmissionUpdateRequest } from '@/types/onboarding';
 // GET /api/cms/onboarding/[id] - Get specific onboarding submission
 export const GET = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const db = getLocalDB();
+    const { getDatabaseInstance } = await import('@/lib/db');
+    const db = getDatabaseInstance();
     const { id } = await params;
     
     const [submission] = await db
@@ -81,7 +81,8 @@ function buildUpdateData(body: OnboardingSubmissionUpdateRequest, existingSubmis
 // PUT /api/cms/onboarding/[id] - Update specific onboarding submission
 export const PUT = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const db = getLocalDB();
+    const { getDatabaseInstance } = await import('@/lib/db');
+    const db = getDatabaseInstance();
     const { id } = await params;
     const body: OnboardingSubmissionUpdateRequest = await request.json();
     
@@ -131,7 +132,8 @@ export const PUT = withAuth(async (request: NextRequest, { params }: { params: P
 // DELETE /api/cms/onboarding/[id] - Delete specific onboarding submission
 export const DELETE = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const db = getLocalDB();
+    const { getDatabaseInstance } = await import('@/lib/db');
+    const db = getDatabaseInstance();
     const { id } = await params;
     
     // Check if submission exists

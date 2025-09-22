@@ -24,13 +24,51 @@ export function getDB(d1Database: D1Database) {
   return drizzleD1(d1Database, { schema });
 }
 
+// Smart database getter that works in different environments
+export function getDatabaseInstance(): ReturnType<typeof getDB> | ReturnType<typeof getLocalDB> {
+  // Check if we're in a Cloudflare Workers/Pages environment
+  if (typeof globalThis !== 'undefined' && 'cloudflare' in globalThis) {
+    // We're in Cloudflare environment - use D1
+    const cf = (globalThis as typeof globalThis & { cloudflare?: { env: { DB: import('@cloudflare/workers-types').D1Database } } }).cloudflare;
+    if (cf?.env?.DB) {
+      return getDB(cf.env.DB);
+    }
+  }
+  
+  // Check for Next.js Edge Runtime with D1 binding
+  if (typeof process !== 'undefined' && process.env.NODE_ENV !== undefined) {
+    // We're in Node.js environment (local development or traditional deployment)
+    return getLocalDB();
+  }
+  
+  // Fallback to local DB
+  return getLocalDB();
+}
+
+// Helper function to get DB from request context (for API routes)
+export function getDBFromRequest(): ReturnType<typeof getDB> | ReturnType<typeof getLocalDB> {
+  // In Cloudflare Pages Functions, the D1 binding is available on the context
+  // This will be used when we migrate API routes to work with the platform adapter
+  
+  // For now, use the smart getter
+  return getDatabaseInstance();
+}
+
 // Environment type definitions
 declare global {
   interface CloudflareEnv {
     DB: D1Database;
   }
+  
+  // Extend global for Cloudflare Workers
+  var cloudflare: {
+    env: CloudflareEnv;
+    cf: import('@cloudflare/workers-types').IncomingRequestCfProperties;
+    ctx: import('@cloudflare/workers-types').ExecutionContext;
+  } | undefined;
 }
 
 // Type helper for database instance
 export type Database = ReturnType<typeof getDB>;
 export type LocalDatabase = ReturnType<typeof getLocalDB>;
+export type DatabaseInstance = Database | LocalDatabase;
