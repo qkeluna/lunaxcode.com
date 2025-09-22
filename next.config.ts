@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+// Check if we're building for static export
+const isStaticExport = process.env.STATIC_EXPORT === 'true';
+
 const nextConfig: NextConfig = {
   // Enable experimental features for better Cloudflare compatibility
   experimental: {
@@ -8,14 +11,44 @@ const nextConfig: NextConfig = {
     // Additional experimental features can be added here
   },
   
-  // For static deployment, enable export mode
-  output: 'export',
-  trailingSlash: true,
+  // Conditionally enable static export mode
+  ...(isStaticExport && {
+    output: 'export',
+    trailingSlash: true,
+    // Disable features not compatible with static export
+    images: {
+      unoptimized: true,
+    },
+  }),
   
-  // Disable features not compatible with static export
-  images: {
-    unoptimized: true,
-  },
+  // For non-static builds, configure normally
+  ...(!isStaticExport && {
+    images: {
+      unoptimized: false,
+      domains: [
+        'localhost',
+        'lunaxcode.com',
+      ],
+    },
+    // Headers for better security and caching
+    async headers() {
+      return [
+        {
+          source: '/api/(.*)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'no-store, must-revalidate',
+            },
+            {
+              key: 'X-Robots-Tag',
+              value: 'noindex',
+            },
+          ],
+        },
+      ];
+    },
+  }),
   
   // Configure for Cloudflare environment
   env: {
@@ -38,12 +71,6 @@ const nextConfig: NextConfig = {
     
     return config;
   },
-  
-  // Image optimization disabled for static export
-  // images config is set above for static export compatibility
-  
-  // Headers disabled for static export
-  // async headers() - not compatible with output: 'export'
 };
 
 export default nextConfig;
