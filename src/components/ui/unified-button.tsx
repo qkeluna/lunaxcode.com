@@ -165,6 +165,11 @@ export interface ButtonProps
    */
   loading?: boolean
 
+  /**
+   * Remove underline from button text (Polaris deprecated but included for compatibility)
+   * @deprecated Use variant instead
+   */
+  removeUnderline?: boolean
 
   /**
    * Disclosure indicator (from Polaris)
@@ -189,6 +194,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     icon,
     loading,
     disclosure,
+    removeUnderline,
     children,
     disabled,
     ...props

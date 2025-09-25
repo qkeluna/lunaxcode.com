@@ -36,6 +36,20 @@ export default function SubmissionsPage() {
     setIsViewModalOpen(true);
   };
 
+  const handleUpdateStatus = async (submissionId: string, newStatus: OnboardingSubmission['status']) => {
+    try {
+      // Use TanStack Query mutation for optimistic updates
+      await updateSubmissionMutation.mutateAsync({
+        id: submissionId,
+        updates: {
+          status: newStatus,
+          updatedAt: new Date(),
+        },
+      });
+    } catch (error) {
+      console.error('Error updating submission status:', error);
+    }
+  };
 
   const handleDeleteSubmission = async (submissionId: string) => {
     if (confirm('Are you sure you want to delete this submission?')) {

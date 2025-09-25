@@ -5,7 +5,7 @@ import { createApiResponse, createErrorResponse } from '@/lib/auth';
 export const runtime = 'edge';
 
 // GET /api/public/pricing - Get active pricing tiers for public display
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const externalApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 
                           process.env.API_BASE_URL ||

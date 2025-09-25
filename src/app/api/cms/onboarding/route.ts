@@ -7,17 +7,25 @@ import {
 // Dynamic runtime selection for better environment compatibility  
 export const runtime = 'edge';
 
-// Use Web API crypto for Edge Runtime compatibility (removed unused function)
+// Use Web API crypto for Edge Runtime compatibility
+function generateSubmissionId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    // Fallback for environments without crypto.randomUUID
+    return 'sub_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+}
 
 // Validate form data function
-const validateFormData = (formData: Record<string, unknown>) => {
+const validateFormData = (formData: any) => {
   const errors: string[] = [];
   
-  if (!formData.projectName || (typeof formData.projectName === 'string' && formData.projectName.trim().length === 0)) {
+  if (!formData.projectName || formData.projectName.trim().length === 0) {
     errors.push('Project name is required');
   }
   
-  if (!formData.contactEmail || (typeof formData.contactEmail === 'string' && !formData.contactEmail.includes('@'))) {
+  if (!formData.contactEmail || !formData.contactEmail.includes('@')) {
     errors.push('Valid email address is required');
   }
   

@@ -10,7 +10,7 @@ export default function AdminLayout({
 }: {
   readonly children: React.ReactNode;
 }) {
-  const { isAdmin, isPending } = useAdminSession();
+  const { isAdmin, isPending, user } = useAdminSession();
   const pathname = usePathname();
   const router = useRouter();
 
