@@ -138,7 +138,7 @@ export function Pricing({ onGetStarted }: PricingProps) {
               console.warn('No pricing data available from API, using fallback');
               setPricingPlans(getFallbackPricing());
             }
-          } catch (parseError) {
+          } catch (_parseError) {
             console.warn('Error parsing pricing response, using fallback');
             setPricingPlans(getFallbackPricing());
           }
@@ -165,7 +165,7 @@ export function Pricing({ onGetStarted }: PricingProps) {
               console.warn('No add-ons data available from API, using fallback');
               setAddOnServices(getFallbackAddons());
             }
-          } catch (parseError) {
+          } catch (_parseError) {
             console.warn('Error parsing addons response, using fallback');
             setAddOnServices(getFallbackAddons());
           }
