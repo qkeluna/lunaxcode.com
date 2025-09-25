@@ -1,12 +1,11 @@
 import { NextRequest } from 'next/server';
-import { withAuth, createApiResponse } from '@/lib/auth';
+import { withAdminAuth, createApiResponse } from '@/lib/auth';
 
 // Enable Edge Runtime for Cloudflare Pages
 export const runtime = 'edge';
 
-export const GET = withAuth(async (req: NextRequest, user) => {
+export const GET = withAdminAuth(async (req: NextRequest) => {
   return createApiResponse({
     message: 'Token is valid',
-    user,
   });
 });
