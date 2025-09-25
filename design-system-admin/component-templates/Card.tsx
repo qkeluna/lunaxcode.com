@@ -115,7 +115,7 @@ export interface CardProps
   /**
    * Render as different HTML element
    */
-  as?: keyof JSX.IntrinsicElements
+  as?: keyof React.JSX.IntrinsicElements
 
   /**
    * Card title (for accessibility and SEO)
