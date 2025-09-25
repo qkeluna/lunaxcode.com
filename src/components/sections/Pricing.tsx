@@ -115,11 +115,11 @@ export function Pricing({ onGetStarted }: PricingProps) {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://lunaxcode-admin-qkeluna8941-yv8g04xo.apn.leapcell.dev/api/v1';
 
         const [pricingResponse, addonsResponse] = await Promise.all([
-          fetch(`${apiBaseUrl}/pricing-plans/popular`).catch((error) => {
+          fetch(`${apiBaseUrl}/pricing-plans/`).catch((error) => {
             console.error('Error fetching pricing plans:', error);
             return null;
           }),
-          fetch(`${apiBaseUrl}/addon-services/popular`).catch((error) => {
+          fetch(`${apiBaseUrl}/addon-services/`).catch((error) => {
             console.error('Error fetching addon services:', error);
             return null;
           })
@@ -130,8 +130,8 @@ export function Pricing({ onGetStarted }: PricingProps) {
           try {
             const pricingResult = await pricingResponse.json();
             console.log('Pricing API response:', pricingResult);
-            if (pricingResult.success && pricingResult.data) {
-              const pricingData = pricingResult.data.pricingTiers || pricingResult.data;
+            if (pricingResult.items && Array.isArray(pricingResult.items)) {
+              const pricingData = pricingResult.items;
               console.log('Processed pricing data:', pricingData);
               setPricingPlans(pricingData);
             } else {
@@ -157,8 +157,8 @@ export function Pricing({ onGetStarted }: PricingProps) {
           try {
             const addonsResult = await addonsResponse.json();
             console.log('Addons API response:', addonsResult);
-            if (addonsResult.success && addonsResult.data) {
-              const addonsData = addonsResult.data.addons || addonsResult.data;
+            if (addonsResult.items && Array.isArray(addonsResult.items)) {
+              const addonsData = addonsResult.items;
               console.log('Processed addons data:', addonsData);
               setAddOnServices(addonsData);
             } else {
