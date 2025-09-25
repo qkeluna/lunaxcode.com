@@ -1,13 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configure for Cloudflare Pages static deployment with external APIs
-  output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true, // Required for Cloudflare Pages
+  // Standard Next.js configuration for Vercel deployment
+  experimental: {
+    // Enable modern features
   },
-  
+
   // Webpack configuration for compatibility
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -19,7 +17,7 @@ const nextConfig: NextConfig = {
         crypto: false,
       };
     }
-    
+
     return config;
   },
 };
