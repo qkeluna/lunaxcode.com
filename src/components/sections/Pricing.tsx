@@ -38,6 +38,71 @@ interface AddOnService {
   is_active: boolean;
 }
 
+// Fallback data for when external API is not available
+function getFallbackPricing(): PricingPlan[] {
+  return [
+    {
+      id: 'landing-page',
+      name: 'Landing Page',
+      price: '₱15,999',
+      period: 'one-time',
+      description: 'Professional landing page with conversion optimization',
+      features: ['Responsive Design', 'SEO Optimization', 'Contact Forms', '48-hour Delivery'],
+      button_text: 'Get Started',
+      button_variant: 'default',
+      popular: true,
+      timeline: '48 hours',
+      category: 'website',
+      display_order: 1,
+      is_active: true
+    },
+    {
+      id: 'web-app',
+      name: 'Web Application',
+      price: '₱49,999',
+      period: 'project',
+      description: 'Custom web application tailored to your business needs',
+      features: ['Custom Development', 'Database Integration', 'User Authentication', 'Admin Dashboard'],
+      button_text: 'Contact Us',
+      button_variant: 'outline',
+      popular: false,
+      timeline: '2-4 weeks',
+      category: 'web-app',
+      display_order: 2,
+      is_active: true
+    }
+  ];
+}
+
+function getFallbackAddons(): AddOnService[] {
+  return [
+    {
+      id: 'seo-premium',
+      name: 'SEO Premium Package',
+      price: '₱5,999',
+      description: 'Advanced SEO optimization with keyword research and analytics',
+      unit: 'one-time',
+      category: 'marketing',
+      icon: 'search',
+      popular: true,
+      display_order: 1,
+      is_active: true
+    },
+    {
+      id: 'chat-widget',
+      name: 'AI Chat Widget',
+      price: '₱3,999',
+      description: 'Intelligent chatbot for customer support and lead generation',
+      unit: 'one-time',
+      category: 'automation',
+      icon: 'message-circle',
+      popular: false,
+      display_order: 2,
+      is_active: true
+    }
+  ];
+}
+
 export function Pricing({ onGetStarted }: PricingProps) {
   const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([]);
   const [addOnServices, setAddOnServices] = useState<AddOnService[]>([]);
@@ -46,49 +111,62 @@ export function Pricing({ onGetStarted }: PricingProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch pricing plans and add-ons from public endpoints
+        // Fetch pricing plans and add-ons from external API or fallback to mock data
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://lunaxcode-admin-qkeluna8941-yv8g04xo.apn.leapcell.dev/api/v1';
+
         const [pricingResponse, addonsResponse] = await Promise.all([
-          fetch('/api/public/pricing'),
-          fetch('/api/public/addons')
+          fetch(`${apiBaseUrl}/pricing/public`).catch(() => null),
+          fetch(`${apiBaseUrl}/addons/public`).catch(() => null)
         ]);
 
-        // Handle pricing plans
-        if (pricingResponse.ok) {
-          const pricingResult = await pricingResponse.json();
-          console.log('Pricing API response:', pricingResult);
-          if (pricingResult.success && pricingResult.data) {
-            const pricingData = pricingResult.data.pricingTiers || pricingResult.data;
-            console.log('Processed pricing data:', pricingData);
-            setPricingPlans(pricingData);
-          } else {
-            console.warn('No pricing data available from API');
-            setPricingPlans([]);
+        // Handle pricing plans with fallback
+        if (pricingResponse && pricingResponse.ok) {
+          try {
+            const pricingResult = await pricingResponse.json();
+            console.log('Pricing API response:', pricingResult);
+            if (pricingResult.success && pricingResult.data) {
+              const pricingData = pricingResult.data.pricingTiers || pricingResult.data;
+              console.log('Processed pricing data:', pricingData);
+              setPricingPlans(pricingData);
+            } else {
+              console.warn('No pricing data available from API, using fallback');
+              setPricingPlans(getFallbackPricing());
+            }
+          } catch (parseError) {
+            console.warn('Error parsing pricing response, using fallback');
+            setPricingPlans(getFallbackPricing());
           }
         } else {
-          console.error('Failed to fetch pricing plans:', pricingResponse.status);
-          setPricingPlans([]);
+          console.warn('External API not available, using fallback pricing');
+          setPricingPlans(getFallbackPricing());
         }
 
-        // Handle add-ons
-        if (addonsResponse.ok) {
-          const addonsResult = await addonsResponse.json();
-          console.log('Addons API response:', addonsResult);
-          if (addonsResult.success && addonsResult.data) {
-            const addonsData = addonsResult.data.addons || addonsResult.data;
-            console.log('Processed addons data:', addonsData);
-            setAddOnServices(addonsData);
-          } else {
-            console.warn('No add-ons data available from API');
-            setAddOnServices([]);
+        // Handle add-ons with fallback
+        if (addonsResponse && addonsResponse.ok) {
+          try {
+            const addonsResult = await addonsResponse.json();
+            console.log('Addons API response:', addonsResult);
+            if (addonsResult.success && addonsResult.data) {
+              const addonsData = addonsResult.data.addons || addonsResult.data;
+              console.log('Processed addons data:', addonsData);
+              setAddOnServices(addonsData);
+            } else {
+              console.warn('No add-ons data available from API, using fallback');
+              setAddOnServices(getFallbackAddons());
+            }
+          } catch (parseError) {
+            console.warn('Error parsing addons response, using fallback');
+            setAddOnServices(getFallbackAddons());
           }
         } else {
-          console.error('Failed to fetch add-ons:', addonsResponse.status);
-          setAddOnServices([]);
+          console.warn('External API not available, using fallback addons');
+          setAddOnServices(getFallbackAddons());
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        setPricingPlans([]);
-        setAddOnServices([]);
+        console.log('Using fallback data due to error');
+        setPricingPlans(getFallbackPricing());
+        setAddOnServices(getFallbackAddons());
       } finally {
         setLoading(false);
       }
