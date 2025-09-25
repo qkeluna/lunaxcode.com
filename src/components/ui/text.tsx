@@ -209,7 +209,7 @@ const Text = React.forwardRef<HTMLElement, TextProps>(
   }, ref) => {
     return (
       <Component
-        ref={ref as any}
+        ref={ref}
         className={cn(
           textVariants({
             variant,

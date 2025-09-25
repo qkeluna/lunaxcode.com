@@ -2,7 +2,7 @@
 
 import { GalleryVerticalEnd, Users, DollarSign, Star, CheckSquare, Settings, FileText, Package } from "lucide-react";
 import { Text } from '@/components/ui/text';
-import { cn } from '@/lib/design-tokens';
+// import { cn } from '@/lib/design-tokens'; // Removed unused import
 import {
   Sidebar,
   SidebarContent,

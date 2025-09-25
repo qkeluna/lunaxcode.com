@@ -8,24 +8,25 @@ import {
 export const runtime = 'edge';
 
 // Use Web API crypto for Edge Runtime compatibility
-function generateSubmissionId(): string {
-  try {
-    return crypto.randomUUID();
-  } catch {
-    // Fallback for environments without crypto.randomUUID
-    return 'sub_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
-}
+// Removed unused generateSubmissionId function
+// function generateSubmissionId(): string {
+//   try {
+//     return crypto.randomUUID();
+//   } catch {
+//     // Fallback for environments without crypto.randomUUID
+//     return 'sub_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+//   }
+// }
 
 // Validate form data function
-const validateFormData = (formData: any) => {
+const validateFormData = (formData: Record<string, unknown>) => {
   const errors: string[] = [];
-  
-  if (!formData.projectName || formData.projectName.trim().length === 0) {
+
+  if (!formData.projectName || typeof formData.projectName !== 'string' || formData.projectName.trim().length === 0) {
     errors.push('Project name is required');
   }
-  
-  if (!formData.contactEmail || !formData.contactEmail.includes('@')) {
+
+  if (!formData.contactEmail || typeof formData.contactEmail !== 'string' || !formData.contactEmail.includes('@')) {
     errors.push('Valid email address is required');
   }
   

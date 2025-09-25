@@ -136,11 +136,20 @@ export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement>
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
 }
 
-export interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+export interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
+  /** Card description specific props */
+  variant?: string;
+}
 
-export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Card content specific props */
+  variant?: string;
+}
 
-export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Card footer specific props */
+  variant?: string;
+}
 
 export interface CardSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
@@ -164,7 +173,7 @@ const UnifiedCard = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant, padding, sectioned, as: Component = "div", ...props }, ref) => {
     return (
       <Component
-        ref={ref as any}
+        ref={ref}
         className={cn(cardVariants({ variant, padding, sectioned, className }))}
         {...props}
       />

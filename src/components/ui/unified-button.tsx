@@ -194,7 +194,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     icon,
     loading,
     disclosure,
-    removeUnderline,
+    // removeUnderline, // Commented out unused variable
     children,
     disabled,
     ...props

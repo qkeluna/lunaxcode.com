@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { ServiceType, StepName, ComponentType, UILayout, DeviceType, ConversionStatus, StepStatus } from '@/types/onboarding';
+import { ServiceType, StepName } from '@/types/onboarding';
 
 // Base schemas for validation
 export const serviceTypeSchema = z.enum(['landing_page', 'web_app', 'mobile_app']);
