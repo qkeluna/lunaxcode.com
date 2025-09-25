@@ -1,28 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configure for Cloudflare Pages deployment
+  // Configure for Cloudflare Pages static deployment with external APIs
+  output: 'export',
+  trailingSlash: true,
   images: {
     unoptimized: true, // Required for Cloudflare Pages
-  },
-  
-  // Headers for better security and caching
-  async headers() {
-    return [
-      {
-        source: '/api/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, must-revalidate',
-          },
-          {
-            key: 'X-Robots-Tag',
-            value: 'noindex',
-          },
-        ],
-      },
-    ];
   },
   
   // Webpack configuration for compatibility
