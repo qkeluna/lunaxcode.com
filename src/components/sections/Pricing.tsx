@@ -115,8 +115,8 @@ export function Pricing({ onGetStarted }: PricingProps) {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://lunaxcode-admin-qkeluna8941-yv8g04xo.apn.leapcell.dev/api/v1';
 
         const [pricingResponse, addonsResponse] = await Promise.all([
-          fetch(`${apiBaseUrl}/pricing/public`).catch(() => null),
-          fetch(`${apiBaseUrl}/addons/public`).catch(() => null)
+          fetch(`${apiBaseUrl}/pricing-plans/`).catch(() => null),
+          fetch(`${apiBaseUrl}/addon-services/`).catch(() => null)
         ]);
 
         // Handle pricing plans with fallback
