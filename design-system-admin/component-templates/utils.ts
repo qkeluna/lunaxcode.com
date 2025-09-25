@@ -520,9 +520,5 @@ export {
   twMerge
 }
 
-// Type exports
-export type {
-  ClassValue,
-  ThemeMode,
-  Breakpoint
-}
+// Type exports (ClassValue from clsx, others defined above)
+export type { ClassValue }

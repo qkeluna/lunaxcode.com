@@ -158,34 +158,7 @@ export interface TextProps
    * The HTML element to render
    * @default "span"
    */
-  as?:
-    | "p"
-    | "span"
-    | "div"
-    | "h1"
-    | "h2"
-    | "h3"
-    | "h4"
-    | "h5"
-    | "h6"
-    | "strong"
-    | "em"
-    | "small"
-    | "abbr"
-    | "code"
-    | "kbd"
-    | "samp"
-    | "var"
-    | "time"
-    | "mark"
-    | "del"
-    | "ins"
-    | "sub"
-    | "sup"
-    | "blockquote"
-    | "cite"
-    | "q"
-    | "dfn"
+  as?: React.ElementType
 
   /**
    * Visually hidden text (for screen readers)
@@ -203,10 +176,11 @@ const Text = React.forwardRef<HTMLElement, TextProps>(
     weight,
     truncate,
     breakWord,
-    as: Component = "span",
+    as = "span",
     visuallyHidden,
     ...props
   }, ref) => {
+    const Component = as as React.ElementType;
     return (
       <Component
         ref={ref}
