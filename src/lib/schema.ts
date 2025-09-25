@@ -197,6 +197,18 @@ export type NewCMSUser = typeof cmsUsers.$inferInsert;
 export type FormSubmission = typeof formSubmissions.$inferSelect;
 export type NewFormSubmission = typeof formSubmissions.$inferInsert;
 
+export type OnboardingSubmission = typeof onboardingSubmission.$inferSelect;
+export type NewOnboardingSubmission = typeof onboardingSubmission.$inferInsert;
+
+export type OnboardingStep = typeof onboardingSteps.$inferSelect;
+export type NewOnboardingStep = typeof onboardingSteps.$inferInsert;
+
+export type OnboardingStepProgress = typeof onboardingStepProgress.$inferSelect;
+export type NewOnboardingStepProgress = typeof onboardingStepProgress.$inferInsert;
+
+export type OnboardingAnalytics = typeof onboardingAnalytics.$inferSelect;
+export type NewOnboardingAnalytics = typeof onboardingAnalytics.$inferInsert;
+
 // Onboarding Submissions table
 export const onboardingSubmission = sqliteTable('onboarding_submission', {
   id: text('id').primaryKey(),
@@ -242,4 +254,137 @@ export const onboardingSubmission = sqliteTable('onboarding_submission', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   completedAt: text('completed_at'),
+});
+
+// Onboarding Steps Process table - Tracks the onboarding workflow steps
+export const onboardingSteps = sqliteTable('onboarding_steps', {
+  id: text('id').primaryKey(),
+  
+  // Step Configuration
+  stepNumber: integer('step_number').notNull(),
+  stepName: text('step_name').notNull(), // 'service_selection', 'basic_info', 'service_requirements', 'review', 'confirmation'
+  stepTitle: text('step_title').notNull(),
+  stepDescription: text('step_description'),
+  
+  // Step Validation and Schema
+  validationSchema: text('validation_schema'), // JSON schema for step validation
+  requiredFields: text('required_fields'), // JSON array of required field names
+  optionalFields: text('optional_fields'), // JSON array of optional field names
+  
+  // UI Configuration
+  componentType: text('component_type').notNull(), // 'form', 'selection', 'review', 'confirmation'
+  formConfig: text('form_config'), // JSON configuration for form rendering
+  uiLayout: text('ui_layout'), // 'single_column', 'two_column', 'grid', 'custom'
+  
+  // Flow Control
+  nextStepConditions: text('next_step_conditions'), // JSON conditions for next step
+  skipConditions: text('skip_conditions'), // JSON conditions to skip this step
+  backAllowed: integer('back_allowed', { mode: 'boolean' }).notNull().default(true),
+  
+  // Service Type Specific
+  serviceTypes: text('service_types'), // JSON array of applicable service types
+  isConditional: integer('is_conditional', { mode: 'boolean' }).notNull().default(false),
+  conditionalLogic: text('conditional_logic'), // JSON logic for conditional display
+  
+  // Progress and Display
+  displayOrder: integer('display_order').notNull().default(0),
+  progressWeight: integer('progress_weight').notNull().default(1), // How much this step contributes to progress
+  estimatedTime: integer('estimated_time'), // Estimated completion time in minutes
+  
+  // Status and Management
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  isRequired: integer('is_required', { mode: 'boolean' }).notNull().default(true),
+  
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Onboarding Step Progress table - Tracks individual user progress through steps
+export const onboardingStepProgress = sqliteTable('onboarding_step_progress', {
+  id: text('id').primaryKey(),
+  
+  // Relationships
+  submissionId: text('submission_id').notNull().references(() => onboardingSubmission.id, { onDelete: 'cascade' }),
+  stepId: text('step_id').notNull().references(() => onboardingSteps.id),
+  
+  // Progress Tracking
+  stepNumber: integer('step_number').notNull(),
+  stepName: text('step_name').notNull(),
+  status: text('status').notNull().default('pending'), // 'pending', 'in_progress', 'completed', 'skipped', 'error'
+  
+  // Step Data
+  stepData: text('step_data'), // JSON data collected in this step
+  validationErrors: text('validation_errors'), // JSON array of validation errors
+  userInput: text('user_input'), // JSON raw user input
+  
+  // Timing and Analytics
+  startedAt: text('started_at'),
+  completedAt: text('completed_at'),
+  timeSpent: integer('time_spent'), // Time spent in seconds
+  attemptCount: integer('attempt_count').notNull().default(1),
+  
+  // Navigation History
+  previousStepId: text('previous_step_id'),
+  nextStepId: text('next_step_id'),
+  navigationHistory: text('navigation_history'), // JSON array of navigation events
+  
+  // User Experience
+  userAgent: text('user_agent'),
+  deviceType: text('device_type'), // 'desktop', 'tablet', 'mobile'
+  exitedAt: text('exited_at'), // If user left without completing
+  
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Onboarding Analytics table - Tracks performance and optimization data
+export const onboardingAnalytics = sqliteTable('onboarding_analytics', {
+  id: text('id').primaryKey(),
+  
+  // Session Information
+  sessionId: text('session_id').notNull(),
+  submissionId: text('submission_id').references(() => onboardingSubmission.id),
+  
+  // Flow Analytics
+  totalSteps: integer('total_steps').notNull(),
+  completedSteps: integer('completed_steps').notNull().default(0),
+  skippedSteps: integer('skipped_steps').notNull().default(0),
+  errorSteps: integer('error_steps').notNull().default(0),
+  
+  // Timing Analytics
+  totalTimeSpent: integer('total_time_spent'), // Total time in seconds
+  averageStepTime: integer('average_step_time'), // Average time per step
+  fastestStep: text('fastest_step'), // Step completed fastest
+  slowestStep: text('slowest_step'), // Step that took longest
+  
+  // Completion Analytics
+  completionRate: integer('completion_rate'), // Percentage (0-100)
+  abandonedAt: text('abandoned_at'), // Step where user abandoned
+  conversionStatus: text('conversion_status'), // 'completed', 'abandoned', 'in_progress'
+  
+  // User Behavior
+  backNavigationCount: integer('back_navigation_count').notNull().default(0),
+  errorCount: integer('error_count').notNull().default(0),
+  retryCount: integer('retry_count').notNull().default(0),
+  helpRequested: integer('help_requested', { mode: 'boolean' }).notNull().default(false),
+  
+  // Technical Metrics
+  performanceScore: integer('performance_score'), // 0-100 performance rating
+  userExperienceScore: integer('user_experience_score'), // 0-100 UX rating
+  technicalIssues: text('technical_issues'), // JSON array of technical issues
+  
+  // Device and Environment
+  userAgent: text('user_agent'),
+  deviceType: text('device_type'),
+  browserName: text('browser_name'),
+  operatingSystem: text('operating_system'),
+  screenResolution: text('screen_resolution'),
+  
+  // Timestamps
+  startedAt: text('started_at').default(sql`CURRENT_TIMESTAMP`),
+  completedAt: text('completed_at'),
+  lastActiveAt: text('last_active_at'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });

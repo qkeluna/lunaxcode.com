@@ -68,8 +68,12 @@ export function Process() {
   ];
 
   return (
-    <section id="process" className="py-20 bg-white dark:bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section 
+      id="process" 
+      className="bg-[var(--bg-secondary)] dark:bg-[var(--bg-secondary)]"
+      style={{ paddingTop: 'var(--section-padding-md)', paddingBottom: 'var(--section-padding-md)' }}
+    >
+      <div className="container mx-auto px-[var(--container-padding)] lg:px-12 max-w-[1200px]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -77,10 +81,10 @@ export function Process() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-h2 font-bold text-[var(--text-primary)] mb-6">
             Our Development Process
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-body-lg text-[var(--text-secondary)] max-w-3xl mx-auto">
             A proven 4-step process that ensures your project is delivered on time, 
             within budget, and exceeds your expectations.
           </p>
@@ -91,7 +95,8 @@ export function Process() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          style={{ gap: 'var(--grid-gap)' }}
         >
           {processSteps.map((step, index) => {
             const IconComponent = step.icon;
@@ -99,33 +104,36 @@ export function Process() {
               <motion.div
                 key={step.title}
                 variants={itemVariants}
-                whileHover={{ y: -10 }}
-                className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl"
+                whileHover={{ 
+                  y: -4,
+                  transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] }
+                }}
+                className="relative bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 hover:border-[var(--accent-primary)] transition-all duration-300"
               >
-                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-6 mx-auto">
-                  <IconComponent className="w-8 h-8 text-white" />
+                <div className="flex items-center justify-center w-12 h-12 bg-[var(--surface-elevated)] rounded-xl mb-6 mx-auto">
+                  <IconComponent className="w-6 h-6 text-[var(--accent-primary)]" strokeWidth={1.5} />
                 </div>
                 
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 text-center">
+                <h3 className="text-h5 font-semibold text-[var(--text-primary)] mb-3 text-center">
                   {step.title}
                 </h3>
                 
-                <p className="text-gray-600 dark:text-gray-300 mb-4 text-center">
+                <p className="text-body-sm text-[var(--text-secondary)] mb-4 text-center">
                   {step.description}
                 </p>
                 
                 <ul className="space-y-2">
                   {step.details.map((detail) => (
-                    <li key={detail} className="text-sm text-gray-600 dark:text-gray-300 flex items-start">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                    <li key={detail} className="text-caption text-[var(--text-secondary)] flex items-start">
+                      <span className="w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full mt-2 mr-3 flex-shrink-0"></span>
                       {detail}
                     </li>
                   ))}
                 </ul>
                 
-                {/* Step connector line (hidden on mobile, visible on larger screens) */}
+                {/* Step connector line - subtle Linear style */}
                 {index < processSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-full w-8 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transform -translate-y-1/2"></div>
+                  <div className="hidden lg:block absolute top-6 left-full w-6 h-px bg-[var(--border-subtle)] transform -translate-y-1/2"></div>
                 )}
               </motion.div>
             );
@@ -138,32 +146,40 @@ export function Process() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-16"
+          className="text-center mt-20"
         >
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl p-8">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-3xl p-12">
+            <h3 className="text-h3 font-bold text-[var(--text-primary)] mb-4">
               Ready to Start Your Project?
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-body-lg text-[var(--text-secondary)] mb-8 max-w-2xl mx-auto">
               Get in touch today for a free consultation and let&apos;s bring your vision to life.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-200"
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.15 }}
               >
-                View Pricing
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-                className="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold px-8 py-3 rounded-lg transition-all duration-200"
+                <button
+                  onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200"
+                >
+                  View Pricing
+                </button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.15 }}
               >
-                Contact Us
-              </motion.button>
+                <button
+                  onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+                  className="border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:border-blue-500 dark:hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium px-8 py-3 rounded-lg transition-all duration-200"
+                >
+                  Contact Us
+                </button>
+              </motion.div>
             </div>
           </div>
         </motion.div>

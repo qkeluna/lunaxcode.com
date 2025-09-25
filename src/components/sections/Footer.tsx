@@ -28,9 +28,15 @@ export function Footer() {
   };
 
   return (
-    <footer id="contact" className="bg-gray-900 dark:bg-black text-white">
+    <footer 
+      id="contact" 
+      className="bg-[var(--bg-primary)] dark:bg-[var(--bg-primary)] border-t border-[var(--border-subtle)]"
+    >
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div 
+        className="container mx-auto px-[var(--container-padding)] lg:px-12 max-w-[1200px]"
+        style={{ paddingTop: 'var(--section-padding-md)', paddingBottom: 'var(--section-padding-sm)' }}
+      >
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -40,31 +46,32 @@ export function Footer() {
         >
           {/* Company Info */}
           <motion.div variants={itemVariants} className="lg:col-span-2">
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+            <div className="flex items-center mb-6">
+              <div className="text-2xl font-bold text-[var(--text-primary)]">
                 Lunaxcode
               </div>
             </div>
-            <p className="text-gray-300 mb-6 leading-relaxed">
+            <p className="text-[var(--text-secondary)] mb-6 leading-relaxed max-w-md">
               Code at the Speed of Light. Professional websites and mobile apps for Filipino SMEs.
               We combine cutting-edge AI technology with human expertise to deliver exceptional
               digital solutions that drive business growth.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               {[
-                { Icon: Mail, href: "#", label: "Email" },
-                { Icon: Phone, href: "#", label: "Phone" },
+                { Icon: Mail, href: "mailto:hello@lunaxcode.com", label: "Email" },
+                { Icon: Phone, href: "tel:+639123456789", label: "Phone" },
                 { Icon: MapPin, href: "#", label: "Location" },
               ].map(({ Icon, href, label }) => (
                 <motion.a
                   key={label}
                   href={href}
                   aria-label={label}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="w-9 h-9 bg-[var(--surface-elevated)] rounded-lg flex items-center justify-center hover:bg-[var(--accent-primary)] hover:text-white transition-colors duration-200"
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4" />
                 </motion.a>
               ))}
             </div>
@@ -72,20 +79,20 @@ export function Footer() {
 
           {/* Services */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-xl font-semibold mb-6">Services</h3>
+            <h3 className="text-h5 font-semibold text-[var(--text-primary)] mb-6">Services</h3>
             <ul className="space-y-3">
               {[
-                { name: "Landing Pages", id: "services" },
-                { name: "Website Development", id: "services" },
-                { name: "Mobile Apps", id: "services" },
-                { name: "AI Integration", id: "services" },
-                { name: "SEO Optimization", id: "services" },
-                { name: "Maintenance", id: "services" },
+                { name: "Landing Pages", id: "features" },
+                { name: "Website Development", id: "features" },
+                { name: "Mobile Apps", id: "features" },
+                { name: "AI Integration", id: "features" },
+                { name: "SEO Optimization", id: "features" },
+                { name: "Maintenance", id: "features" },
               ].map((service) => (
                 <li key={service.name}>
                   <button
                     onClick={() => scrollToSection(service.id)}
-                    className="text-gray-300 hover:text-white transition-colors duration-300 text-left"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-200 text-left text-body-sm"
                   >
                     {service.name}
                   </button>
@@ -96,37 +103,37 @@ export function Footer() {
 
           {/* Contact Info */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-xl font-semibold mb-6">Contact</h3>
+            <h3 className="text-h5 font-semibold text-[var(--text-primary)] mb-6">Contact</h3>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <Mail className="w-5 h-5 text-blue-400 mt-1 flex-shrink-0" />
+                <Mail className="w-4 h-4 text-[var(--accent-secondary)] mt-1 flex-shrink-0" />
                 <div>
-                  <div className="text-gray-300">Email</div>
+                  <div className="text-[var(--text-secondary)] text-caption">Email</div>
                   <a
                     href="mailto:hello@lunaxcode.com"
-                    className="text-white hover:text-blue-400 transition-colors duration-300"
+                    className="text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition-colors duration-200 text-body-sm"
                   >
                     hello@lunaxcode.com
                   </a>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
-                <Phone className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
+                <Phone className="w-4 h-4 text-[var(--accent-success)] mt-1 flex-shrink-0" />
                 <div>
-                  <div className="text-gray-300">Phone</div>
+                  <div className="text-[var(--text-secondary)] text-caption">Phone</div>
                   <a
                     href="tel:+639123456789"
-                    className="text-white hover:text-green-400 transition-colors duration-300"
+                    className="text-[var(--text-primary)] hover:text-[var(--accent-success)] transition-colors duration-200 text-body-sm"
                   >
                     +63 912 345 6789
                   </a>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-[var(--accent-warning)] mt-1 flex-shrink-0" />
                 <div>
-                  <div className="text-gray-300">Location</div>
-                  <div className="text-white">Metro Manila, Philippines</div>
+                  <div className="text-[var(--text-secondary)] text-caption">Location</div>
+                  <div className="text-[var(--text-primary)] text-body-sm">Metro Manila, Philippines</div>
                 </div>
               </div>
             </div>
@@ -134,65 +141,29 @@ export function Footer() {
         </motion.div>
       </div>
 
-      {/* CTA Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        className="bg-gradient-to-r from-blue-600 to-purple-600 py-12"
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-3xl font-bold text-white mb-4">
-            Ready to Start Your Project?
-          </h3>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Let&apos;s discuss your requirements and create the perfect digital solution for your business.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => scrollToSection("pricing")}
-              className="bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl hover:bg-gray-50 transition-colors duration-300 shadow-lg"
-            >
-              View Pricing
-            </motion.button>
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="mailto:hello@lunaxcode.com"
-              className="bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/10 transition-all duration-300"
-            >
-              Get Free Consultation
-            </motion.a>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Bottom Bar */}
-      <div className="border-t border-gray-800 py-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="border-t border-[var(--border-subtle)] py-8">
+        <div className="container mx-auto px-[var(--container-padding)] lg:px-12 max-w-[1200px]">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-gray-400 text-sm mb-4 md:mb-0">
+            <div className="text-[var(--text-tertiary)] text-caption mb-4 md:mb-0">
               © {new Date().getFullYear()} Lunaxcode. All rights reserved.
             </div>
-            <div className="flex flex-wrap gap-6 text-sm">
+            <div className="flex flex-wrap gap-6 text-caption">
               <button
-                onClick={() => scrollToSection("services")}
-                className="text-gray-400 hover:text-white transition-colors duration-300"
+                onClick={() => scrollToSection("features")}
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-200"
               >
                 Privacy Policy
               </button>
               <button
-                onClick={() => scrollToSection("services")}
-                className="text-gray-400 hover:text-white transition-colors duration-300"
+                onClick={() => scrollToSection("features")}
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-200"
               >
                 Terms of Service
               </button>
               <button
-                onClick={() => scrollToSection("services")}
-                className="text-gray-400 hover:text-white transition-colors duration-300"
+                onClick={() => scrollToSection("features")}
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-200"
               >
                 Cookie Policy
               </button>

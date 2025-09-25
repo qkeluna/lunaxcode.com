@@ -16,13 +16,13 @@ interface PricingPlan {
   period: string;
   description: string;
   features: string[];
-  buttonText: string;
-  buttonVariant: string;
+  button_text: string;
+  button_variant: string;
   popular: boolean;
   timeline: string;
-  displayOrder: number;
+  display_order: number;
   category?: string;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 interface AddOnService {
@@ -34,8 +34,8 @@ interface AddOnService {
   category?: string;
   icon?: string;
   popular: boolean;
-  displayOrder: number;
-  isActive: boolean;
+  display_order: number;
+  is_active: boolean;
 }
 
 export function Pricing({ onGetStarted }: PricingProps) {
@@ -46,17 +46,20 @@ export function Pricing({ onGetStarted }: PricingProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch pricing plans and add-ons in parallel
+        // Fetch pricing plans and add-ons from public endpoints
         const [pricingResponse, addonsResponse] = await Promise.all([
-          fetch('/api/cms/pricing'),
-          fetch('/api/cms/addons')
+          fetch('/api/public/pricing'),
+          fetch('/api/public/addons')
         ]);
 
         // Handle pricing plans
         if (pricingResponse.ok) {
           const pricingResult = await pricingResponse.json();
+          console.log('Pricing API response:', pricingResult);
           if (pricingResult.success && pricingResult.data) {
-            setPricingPlans(pricingResult.data);
+            const pricingData = pricingResult.data.pricingTiers || pricingResult.data;
+            console.log('Processed pricing data:', pricingData);
+            setPricingPlans(pricingData);
           } else {
             console.warn('No pricing data available from API');
             setPricingPlans([]);
@@ -69,8 +72,11 @@ export function Pricing({ onGetStarted }: PricingProps) {
         // Handle add-ons
         if (addonsResponse.ok) {
           const addonsResult = await addonsResponse.json();
+          console.log('Addons API response:', addonsResult);
           if (addonsResult.success && addonsResult.data) {
-            setAddOnServices(addonsResult.data);
+            const addonsData = addonsResult.data.addons || addonsResult.data;
+            console.log('Processed addons data:', addonsData);
+            setAddOnServices(addonsData);
           } else {
             console.warn('No add-ons data available from API');
             setAddOnServices([]);
@@ -92,10 +98,10 @@ export function Pricing({ onGetStarted }: PricingProps) {
   }, []);
 
   const getButtonStyles = (plan: PricingPlan) => {
-    if (plan.buttonVariant === "gradient") {
-      return "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0";
+    if (plan.button_variant === "gradient" || plan.button_variant === "default") {
+      return "bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 transition-all duration-200";
     }
-    return "border-2 border-gray-300 hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20";
+    return "border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-900 dark:text-white transition-all duration-200";
   };
 
   const containerVariants = {
@@ -115,13 +121,13 @@ export function Pricing({ onGetStarted }: PricingProps) {
   };
 
   // Filter only active plans and separate by category
-  const activePlans = pricingPlans.filter(plan => plan.isActive);
-  const webPlans = activePlans.filter(plan => plan.category === 'web' || plan.id.includes('page') || plan.id.includes('website'));
-  const mobilePlans = activePlans.filter(plan => plan.category === 'mobile' || plan.id.includes('mobile') || plan.id.includes('app'));
+  const activePlans = pricingPlans.filter(plan => plan.is_active !== false);
+  const webPlans = activePlans.filter(plan => plan.category === 'web' || plan.id?.includes('page') || plan.id?.includes('website'));
+  const mobilePlans = activePlans.filter(plan => plan.category === 'mobile' || plan.id?.includes('mobile') || plan.id?.includes('app'));
   
   // Sort plans by display order
-  const finalWebPlans = webPlans.sort((a, b) => a.displayOrder - b.displayOrder);
-  const finalMobilePlans = mobilePlans.sort((a, b) => a.displayOrder - b.displayOrder);
+  const finalWebPlans = webPlans.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  const finalMobilePlans = mobilePlans.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 
   if (loading) {
     return (
@@ -194,7 +200,7 @@ export function Pricing({ onGetStarted }: PricingProps) {
                 </p>
                 <Button 
                   onClick={() => window.location.href = 'mailto:hello@lunaxcode.com'}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white transition-all duration-200"
                 >
                   Contact Us
                 </Button>
@@ -207,8 +213,12 @@ export function Pricing({ onGetStarted }: PricingProps) {
   }
 
   return (
-    <section id="pricing" className="py-20 bg-gray-50 dark:bg-gray-800">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section 
+      id="pricing" 
+      className="bg-[var(--bg-primary)] dark:bg-[var(--bg-primary)]"
+      style={{ paddingTop: 'var(--section-padding-md)', paddingBottom: 'var(--section-padding-md)' }}
+    >
+      <div className="container mx-auto px-[var(--container-padding)] lg:px-12 max-w-[1200px]">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -217,13 +227,13 @@ export function Pricing({ onGetStarted }: PricingProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-h2 font-bold text-[var(--text-primary)] mb-6">
             Choose Your Perfect{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-[var(--accent-primary)]">
               Digital Solution
             </span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-body-lg text-[var(--text-secondary)] max-w-3xl mx-auto">
             From lightning-fast landing pages to comprehensive mobile applications. 
             All plans include AI integration and our satisfaction guarantee.
           </p>
@@ -238,11 +248,11 @@ export function Pricing({ onGetStarted }: PricingProps) {
           className="mb-20"
         >
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-center">
-              <Globe className="mr-3 h-8 w-8 text-blue-600" />
+            <h3 className="text-h3 font-bold text-[var(--text-primary)] mb-4 flex items-center justify-center">
+              <Globe className="mr-3 h-8 w-8 text-[var(--accent-secondary)]" />
               Web Development
             </h3>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <p className="text-body-lg text-[var(--text-secondary)]">
               Professional websites delivered at the speed of light
             </p>
           </div>
@@ -258,15 +268,15 @@ export function Pricing({ onGetStarted }: PricingProps) {
               <motion.div
                 key={plan.id}
                 variants={itemVariants}
-                className={`relative rounded-2xl border-2 p-8 shadow-lg transition-all duration-300 hover:shadow-xl bg-white dark:bg-gray-900 flex flex-col h-full ${
+                className={`relative rounded-xl border-2 p-8 transition-all duration-300 bg-[var(--bg-primary)] flex flex-col h-full ${
                   plan.popular
-                    ? "border-blue-500 scale-105"
-                    : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
+                    ? "border-[var(--accent-primary)] shadow-lg"
+                    : "border-[var(--border-medium)] hover:border-[var(--accent-primary)] hover:shadow-md"
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-[var(--accent-primary)] text-white px-3 py-1 rounded-md text-caption font-medium">
                       Most Popular
                     </span>
                   </div>
@@ -274,25 +284,25 @@ export function Pricing({ onGetStarted }: PricingProps) {
 
                 {/* Header */}
                 <div className="text-center mb-6">
-                  <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h4 className="text-h4 font-bold text-[var(--text-primary)] mb-2">
                     {plan.name}
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-body-sm text-[var(--text-secondary)] mb-4">
                     {plan.description}
                   </p>
                   
                   <div className="mb-4">
-                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                    <span className="text-h1 font-bold text-[var(--text-primary)]">
                       {plan.price}
                     </span>
                     {plan.period && (
-                      <span className="text-gray-600 dark:text-gray-400 ml-1">
+                      <span className="text-body text-[var(--text-secondary)] ml-1">
                         {plan.period}
                       </span>
                     )}
                   </div>
 
-                  <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  <div className="inline-flex items-center px-3 py-1 rounded-md text-body-sm font-medium bg-[var(--surface-elevated)] text-[var(--accent-secondary)]">
                     <Clock className="w-4 h-4 mr-1" />
                     {plan.timeline}
                   </div>
@@ -302,8 +312,8 @@ export function Pricing({ onGetStarted }: PricingProps) {
                 <ul className="space-y-3 mb-8 flex-grow">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-600 dark:text-gray-300 text-sm">
+                      <Check className="h-5 w-5 text-[var(--accent-success)] mr-3 flex-shrink-0 mt-0.5" />
+                      <span className="text-[var(--text-secondary)] text-body-sm">
                         {feature}
                       </span>
                     </li>
@@ -316,7 +326,7 @@ export function Pricing({ onGetStarted }: PricingProps) {
                   onClick={() => onGetStarted(plan.id)}
                   size="lg"
                 >
-                  {plan.buttonText}
+                  {plan.button_text}
                 </Button>
               </motion.div>
             ))}
@@ -332,13 +342,13 @@ export function Pricing({ onGetStarted }: PricingProps) {
           className="mb-20"
         >
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-center">
-              <svg className="mr-3 h-8 w-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+            <h3 className="text-h3 font-bold text-[var(--text-primary)] mb-4 flex items-center justify-center">
+              <svg className="mr-3 h-8 w-8 text-[var(--accent-primary)]" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zM6 4a1 1 0 011-1h6a1 1 0 011 1v12a1 1 0 01-1 1H7a1 1 0 01-1-1V4zm2 10a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clipRule="evenodd" />
               </svg>
               Mobile App Development
             </h3>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <p className="text-body-lg text-[var(--text-secondary)]">
               Cross-platform mobile solutions that drive engagement
             </p>
           </div>
@@ -398,8 +408,8 @@ export function Pricing({ onGetStarted }: PricingProps) {
                 <ul className="space-y-3 mb-8 flex-grow">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-600 dark:text-gray-300 text-sm">
+                      <Check className="h-5 w-5 text-[var(--accent-success)] mr-3 flex-shrink-0 mt-0.5" />
+                      <span className="text-[var(--text-secondary)] text-body-sm">
                         {feature}
                       </span>
                     </li>
@@ -412,7 +422,7 @@ export function Pricing({ onGetStarted }: PricingProps) {
                   onClick={() => onGetStarted(plan.id)}
                   size="lg"
                 >
-                  {plan.buttonText}
+                  {plan.button_text}
                 </Button>
               </motion.div>
             ))}
@@ -438,7 +448,7 @@ export function Pricing({ onGetStarted }: PricingProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {addOnServices.filter(addon => addon.isActive).map((addon, index) => (
+              {addOnServices.filter(addon => addon.is_active !== false).map((addon, index) => (
                 <motion.div
                   key={addon.id}
                   initial={{ opacity: 0, y: 20 }}

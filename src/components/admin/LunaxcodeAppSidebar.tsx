@@ -1,6 +1,8 @@
 "use client";
 
 import { GalleryVerticalEnd, Users, DollarSign, Star, CheckSquare, Settings, FileText, Package } from "lucide-react";
+import { Text } from '@/components/ui/text';
+import { cn } from '@/lib/design-tokens';
 import {
   Sidebar,
   SidebarContent,
@@ -68,12 +70,12 @@ export function LunaxcodeAppSidebar({ ...props }: React.ComponentProps<typeof Si
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/admin/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-bg-fill-brand)] text-[var(--color-text-brand-on-bg-fill)]">
                   <GalleryVerticalEnd className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Lunaxcode</span>
-                  <span className="text-xs text-muted-foreground">Admin Panel</span>
+                  <Text variant="bodySm" weight="semibold">Lunaxcode</Text>
+                  <Text variant="caption" tone="secondary">Admin Panel</Text>
                 </div>
               </a>
             </SidebarMenuButton>

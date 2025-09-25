@@ -1,27 +1,14 @@
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { getLocalDB } from "@/lib/db";
-import { user, session, account, verification } from "@/lib/auth-schema";
 import { nextCookies } from "better-auth/next-js";
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
-
-// Create database instance
-const db = getLocalDB();
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "sqlite",
-    schema: {
-      user,
-      session,
-      account,
-      verification,
-    },
-  }),
+  // Using session-only mode for Edge Runtime compatibility
+  // No database persistence - suitable for admin authentication
   emailAndPassword: {
     enabled: true,
-    autoSignIn: false,
+    autoSignIn: true, // Enable auto sign-in for admin convenience
+    requireEmailVerification: false, // Disable for admin-only system
   },
   socialProviders: {
     google: {
@@ -29,12 +16,15 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
-  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001",
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   session: {
     cookieCache: {
       enabled: true,
       maxAge: 60 * 60 * 24 * 7, // 7 days
     },
+  },
+  advanced: {
+    generateId: () => crypto.randomUUID(), // Use built-in UUID generation
   },
   plugins: [nextCookies()],
 });
@@ -48,31 +38,39 @@ export function createErrorResponse(message: string, status: number = 400) {
   return NextResponse.json({ success: false, error: message }, { status });
 }
 
-// JWT token generation for legacy auth (if needed)
-export function generateToken(payload: object) {
-  const secret = process.env.JWT_SECRET || "your-secret-key";
-  return jwt.sign(payload, secret, { expiresIn: "7d" });
+// Admin role checker - only admins can access admin routes
+export async function isAdmin(request: NextRequest): Promise<boolean> {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+    
+    if (!session?.user) return false;
+    
+    // For now, any authenticated user is considered admin
+    // In the future, you can add role-based checking here
+    return true;
+  } catch (error) {
+    console.error("Admin check error:", error);
+    return false;
+  }
 }
 
-// Simple auth middleware wrapper
-export function withAuth<T extends unknown[]>(
+// Admin authentication middleware wrapper - ONLY for admin routes
+export function withAdminAuth<T extends unknown[]>(
   handler: (req: NextRequest, ...args: T) => Promise<NextResponse>
 ) {
   return async (req: NextRequest, ...args: T): Promise<NextResponse> => {
     try {
-      // For Better Auth, we can check the session
-      const session = await auth.api.getSession({
-        headers: req.headers,
-      });
-
-      if (!session) {
-        return createErrorResponse("Unauthorized", 401);
+      const adminAccess = await isAdmin(req);
+      
+      if (!adminAccess) {
+        return createErrorResponse("Admin access required", 403);
       }
 
-      // Add user to the request context if needed
       return handler(req, ...args);
     } catch (error) {
-      console.error("Auth middleware error:", error);
+      console.error("Admin auth middleware error:", error);
       return createErrorResponse("Authentication failed", 401);
     }
   };

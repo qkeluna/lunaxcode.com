@@ -1,163 +1,120 @@
 import { NextRequest } from 'next/server';
-import { eq } from 'drizzle-orm';
-import { onboardingSubmission } from '@/lib/schema';
-import { createApiResponse, createErrorResponse, withAuth } from '@/lib/auth';
-import { OnboardingSubmissionUpdateRequest } from '@/types/onboarding';
+import { withAdminAuth, createApiResponse, createErrorResponse } from '@/lib/auth';
 
 // Enable Edge Runtime for Cloudflare Pages
 export const runtime = 'edge';
 
-// GET /api/cms/onboarding/[id] - Get specific onboarding submission
-export const GET = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+// Helper function to get external API URL
+const getExternalApiUrl = () => {
+  return process.env.NEXT_PUBLIC_API_BASE_URL || 
+         process.env.API_BASE_URL ||
+         'https://lunaxcode-admin-qkeluna8941-yv8g04xo.apn.leapcell.dev/api/v1';
+};
+
+// GET /api/cms/onboarding/[id] - Get specific onboarding submission (Admin only)
+export const GET = withAdminAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const { getDatabaseInstance } = await import('@/lib/db');
-    const db = getDatabaseInstance();
+    const externalApiUrl = getExternalApiUrl();
     const { id } = await params;
     
-    const [submission] = await db
-      .select()
-      .from(onboardingSubmission)
-      .where(eq(onboardingSubmission.id, id))
-      .limit(1);
-    
-    if (!submission) {
-      return createErrorResponse('Onboarding submission not found', 404);
+    // Forward request to external API
+    const response = await fetch(`${externalApiUrl}/onboarding/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        // Forward any authorization headers if needed
+        ...(request.headers.get('authorization') && {
+          'Authorization': request.headers.get('authorization')!
+        })
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return createErrorResponse('Onboarding submission not found', 404);
+      }
+      throw new Error(`External API error: ${response.status}`);
     }
-    
-    // Parse JSON fields and format timestamps
-    const formattedSubmission = {
-      ...submission,
-      createdAt: submission.createdAt ? new Date(submission.createdAt) : undefined,
-      updatedAt: submission.updatedAt ? new Date(submission.updatedAt) : undefined,
-      completedAt: submission.completedAt ? new Date(submission.completedAt) : undefined,
-      serviceSpecificData: submission.serviceSpecificData ? JSON.parse(submission.serviceSpecificData) : undefined,
-      addOns: submission.addOns ? JSON.parse(submission.addOns) : undefined,
-    };
-    
-    return createApiResponse(formattedSubmission);
+
+    const data = await response.json();
+    return createApiResponse(data.data || data);
   } catch (error) {
     console.error('Error fetching onboarding submission:', error);
     return createErrorResponse('Failed to fetch onboarding submission', 500);
   }
 });
 
-// Helper function to build update data
-function buildUpdateData(body: OnboardingSubmissionUpdateRequest, existingSubmission: Record<string, unknown>) {
-  const now = new Date().toISOString();
-  const updateData: Record<string, unknown> = { updatedAt: now };
-
-  // Basic fields
-  const basicFields = [
-    'projectName', 'companyName', 'industry', 'description', 'name', 'email', 
-    'phone', 'preferredContact', 'serviceType', 'budget', 'timeline', 'urgency',
-    'additionalRequirements', 'inspiration', 'priority', 'assignedTo', 
-    'internalNotes', 'clientNotes'
-  ];
-
-  basicFields.forEach(field => {
-    if (body[field as keyof OnboardingSubmissionUpdateRequest] !== undefined) {
-      updateData[field] = body[field as keyof OnboardingSubmissionUpdateRequest];
-    }
-  });
-
-  // Handle JSON fields
-  if (body.serviceSpecificData !== undefined) {
-    updateData.serviceSpecificData = body.serviceSpecificData ? JSON.stringify(body.serviceSpecificData) : null;
-  }
-  if (body.addOns !== undefined) {
-    updateData.addOns = body.addOns ? JSON.stringify(body.addOns) : null;
-  }
-
-  // Handle status and completedAt
-  if (body.status !== undefined) {
-    updateData.status = body.status;
-    if (body.status === 'completed') {
-      updateData.completedAt = now;
-    } else if (existingSubmission.completedAt) {
-      updateData.completedAt = null;
-    }
-  }
-
-  return updateData;
-}
-
-// PUT /api/cms/onboarding/[id] - Update specific onboarding submission
-export const PUT = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+// PUT /api/cms/onboarding/[id] - Update specific onboarding submission (Admin only)
+export const PUT = withAdminAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const { getDatabaseInstance } = await import('@/lib/db');
-    const db = getDatabaseInstance();
+    const externalApiUrl = getExternalApiUrl();
     const { id } = await params;
-    const body: OnboardingSubmissionUpdateRequest = await request.json();
+    const body = await request.json();
     
-    // Check if submission exists
-    const [existingSubmission] = await db
-      .select()
-      .from(onboardingSubmission)
-      .where(eq(onboardingSubmission.id, id))
-      .limit(1);
-    
-    if (!existingSubmission) {
-      return createErrorResponse('Onboarding submission not found', 404);
+    // Forward request to external API
+    const response = await fetch(`${externalApiUrl}/onboarding/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        // Forward any authorization headers if needed
+        ...(request.headers.get('authorization') && {
+          'Authorization': request.headers.get('authorization')!
+        })
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return createErrorResponse('Onboarding submission not found', 404);
+      }
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `External API error: ${response.status}`);
     }
-    
-    const updateData = buildUpdateData(body, existingSubmission);
-    
-    // Update the submission
-    await db
-      .update(onboardingSubmission)
-      .set(updateData)
-      .where(eq(onboardingSubmission.id, id));
-    
-    // Fetch and return the updated submission
-    const [updatedSubmission] = await db
-      .select()
-      .from(onboardingSubmission)
-      .where(eq(onboardingSubmission.id, id))
-      .limit(1);
-    
-    // Parse JSON fields and format timestamps
-    const formattedSubmission = {
-      ...updatedSubmission,
-      createdAt: updatedSubmission.createdAt ? new Date(updatedSubmission.createdAt) : undefined,
-      updatedAt: updatedSubmission.updatedAt ? new Date(updatedSubmission.updatedAt) : undefined,
-      completedAt: updatedSubmission.completedAt ? new Date(updatedSubmission.completedAt) : undefined,
-      serviceSpecificData: updatedSubmission.serviceSpecificData ? JSON.parse(updatedSubmission.serviceSpecificData) : undefined,
-      addOns: updatedSubmission.addOns ? JSON.parse(updatedSubmission.addOns) : undefined,
-    };
-    
-    return createApiResponse(formattedSubmission);
+
+    const data = await response.json();
+    return createApiResponse(data.data || data);
   } catch (error) {
     console.error('Error updating onboarding submission:', error);
-    return createErrorResponse('Failed to update onboarding submission', 500);
+    return createErrorResponse(
+      error instanceof Error ? error.message : 'Failed to update onboarding submission', 
+      500
+    );
   }
 });
 
-// DELETE /api/cms/onboarding/[id] - Delete specific onboarding submission
-export const DELETE = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+// DELETE /api/cms/onboarding/[id] - Delete specific onboarding submission (Admin only)
+export const DELETE = withAdminAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const { getDatabaseInstance } = await import('@/lib/db');
-    const db = getDatabaseInstance();
+    const externalApiUrl = getExternalApiUrl();
     const { id } = await params;
     
-    // Check if submission exists
-    const [existingSubmission] = await db
-      .select()
-      .from(onboardingSubmission)
-      .where(eq(onboardingSubmission.id, id))
-      .limit(1);
-    
-    if (!existingSubmission) {
-      return createErrorResponse('Onboarding submission not found', 404);
+    // Forward request to external API
+    const response = await fetch(`${externalApiUrl}/onboarding/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        // Forward any authorization headers if needed
+        ...(request.headers.get('authorization') && {
+          'Authorization': request.headers.get('authorization')!
+        })
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return createErrorResponse('Onboarding submission not found', 404);
+      }
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `External API error: ${response.status}`);
     }
-    
-    // Delete the submission
-    await db
-      .delete(onboardingSubmission)
-      .where(eq(onboardingSubmission.id, id));
-    
+
     return createApiResponse({ message: 'Onboarding submission deleted successfully' });
   } catch (error) {
     console.error('Error deleting onboarding submission:', error);
-    return createErrorResponse('Failed to delete onboarding submission', 500);
+    return createErrorResponse(
+      error instanceof Error ? error.message : 'Failed to delete onboarding submission', 
+      500
+    );
   }
 });

@@ -362,23 +362,23 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
 
   return (
     <Dialog open={isOpen} onOpenChange={resetModal}>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto mx-auto">
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto mx-auto bg-[var(--bg-primary)] border border-[var(--border-medium)]">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold text-center">
+          <DialogTitle className="text-h3 font-bold text-center text-[var(--text-primary)]">
             Project Onboarding
           </DialogTitle>
-          <p className="text-center text-gray-600 text-sm sm:text-base">
+          <p className="text-center text-[var(--text-secondary)] text-body-sm">
             Let&apos;s gather your requirements and create the perfect solution
           </p>
         </DialogHeader>
 
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
+        <div className="w-full bg-[var(--surface-elevated)] rounded-full h-2 mb-8">
           <motion.div
-            className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
+            className="bg-[var(--accent-primary)] h-2 rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           />
         </div>
 
@@ -392,27 +392,27 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <h3 className="text-lg sm:text-xl font-semibold text-center">Confirm Your Selected Service</h3>
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 sm:p-6 rounded-xl">
+              <h3 className="text-h4 font-semibold text-center text-[var(--text-primary)]">Confirm Your Selected Service</h3>
+              <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] p-4 sm:p-6 rounded-xl">
                 <div className="text-center">
-                  <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                  <h4 className="text-h3 font-bold text-[var(--text-primary)] mb-2">
                     {serviceDetails[selectedService as keyof typeof serviceDetails]?.name}
                   </h4>
                   <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-4">
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-blue-600">
+                      <div className="text-body-lg font-semibold text-[var(--accent-secondary)]">
                         {serviceDetails[selectedService as keyof typeof serviceDetails]?.price}
                       </div>
-                      <div className="text-sm text-gray-600">Price Range</div>
+                      <div className="text-caption text-[var(--text-secondary)]">Price Range</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-green-600">
+                      <div className="text-body-lg font-semibold text-[var(--accent-success)]">
                         {serviceDetails[selectedService as keyof typeof serviceDetails]?.timeline}
                       </div>
-                      <div className="text-sm text-gray-600">Timeline</div>
+                      <div className="text-caption text-[var(--text-secondary)]">Timeline</div>
                     </div>
                   </div>
-                  <p className="text-gray-700 text-sm sm:text-base">
+                  <p className="text-[var(--text-secondary)] text-body-sm">
                     {serviceDetails[selectedService as keyof typeof serviceDetails]?.description}
                   </p>
                 </div>
@@ -437,7 +437,7 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <h3 className="text-lg sm:text-xl font-semibold text-center">Project Information</h3>
+              <h3 className="text-h4 font-semibold text-center text-[var(--text-primary)]">Project Information</h3>
               <Form {...basicInfoForm}>
                 <form className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -504,7 +504,7 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
                         <FormLabel>Project Description *</FormLabel>
                         <FormControl>
                           <textarea
-                            className="w-full p-3 border border-gray-300 rounded-md resize-none"
+                            className="w-full p-3 border border-[var(--border-medium)] rounded-lg resize-none bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors"
                             rows={4}
                             placeholder="Describe the project goals, target audience, and key requirements..."
                             {...field}
@@ -567,7 +567,7 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <h3 className="text-lg sm:text-xl font-semibold text-center">Service Requirements</h3>
+              <h3 className="text-h4 font-semibold text-center text-[var(--text-primary)]">Service Requirements</h3>
               <Form {...serviceSpecificForm}>
                 <form className="space-y-6">
                   {renderServiceSpecificForm()}
@@ -595,8 +595,8 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <h3 className="text-lg sm:text-xl font-semibold text-center">Project Summary</h3>
-              <div className="bg-gray-50 p-4 sm:p-6 rounded-xl space-y-4">
+              <h3 className="text-h4 font-semibold text-center text-[var(--text-primary)]">Project Summary</h3>
+              <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] p-4 sm:p-6 rounded-xl space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <span className="font-semibold">Service:</span>
@@ -629,9 +629,9 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
                 </div>
               </div>
 
-              <div className="bg-green-50 p-4 sm:p-6 rounded-xl">
-                <h4 className="font-semibold text-green-800 mb-3">What happens next?</h4>
-                <ul className="text-green-700 space-y-2 text-sm sm:text-base">
+              <div className="bg-[var(--accent-success)]/10 border border-[var(--accent-success)]/20 p-4 sm:p-6 rounded-xl">
+                <h4 className="font-semibold text-[var(--accent-success)] mb-3">What happens next?</h4>
+                <ul className="text-[var(--text-primary)] space-y-2 text-body-sm">
                   <li>• We&apos;ll review your requirements within 24 hours</li>
                   <li>• Receive a detailed project proposal and timeline</li>
                   <li>• Schedule a consultation call to discuss details</li>
@@ -659,18 +659,18 @@ export function OnboardingModal({ isOpen, onClose, selectedService }: Onboarding
               exit={{ opacity: 0, scale: 0.9 }}
               className="text-center space-y-6"
             >
-              <div className="text-4xl sm:text-6xl text-green-500 mb-4">✓</div>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Project Submitted Successfully!</h3>
-              <p className="text-gray-600 text-sm sm:text-base">
+              <div className="text-4xl sm:text-6xl text-[var(--accent-success)] mb-4">✓</div>
+              <h3 className="text-h3 font-bold text-[var(--text-primary)]">Project Submitted Successfully!</h3>
+              <p className="text-[var(--text-secondary)] text-body-sm">
                 Thank you for choosing Lunaxcode. We&apos;ll be in touch within 24 hours with next steps.
               </p>
 
-              <div className="bg-blue-50 p-4 sm:p-6 rounded-xl">
-                <h4 className="font-semibold text-blue-800 mb-2">Your Reference Number</h4>
-                <div className="text-xl sm:text-2xl font-bold text-blue-600">
+              <div className="bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 p-4 sm:p-6 rounded-xl">
+                <h4 className="font-semibold text-[var(--accent-primary)] mb-2">Your Reference Number</h4>
+                <div className="text-h3 font-bold text-[var(--accent-primary)]">
                   {formData.submissionId ? `LXC-${(formData.submissionId as string).slice(-8).toUpperCase()}` : `LXC${Date.now().toString().slice(-6)}`}
                 </div>
-                <p className="text-sm text-blue-600 mt-2">
+                <p className="text-caption text-[var(--accent-primary)] mt-2">
                   Keep this number for your records
                 </p>
               </div>

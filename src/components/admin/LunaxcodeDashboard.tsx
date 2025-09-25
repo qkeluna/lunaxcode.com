@@ -2,13 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  UnifiedCard as Card, 
+  UnifiedCardContent as CardContent, 
+  UnifiedCardDescription as CardDescription, 
+  UnifiedCardHeader as CardHeader, 
+  UnifiedCardTitle as CardTitle 
+} from '@/components/ui/unified-card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/unified-button';
+import { Text, Heading } from '@/components/ui/text';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { LunaxcodeAppSidebar } from '@/components/admin/LunaxcodeAppSidebar';
 import { LunaxcodeSiteHeader } from '@/components/admin/LunaxcodeSiteHeader';
 import { LunaxcodeSiteFooter } from '@/components/admin/LunaxcodeSiteFooter';
+import { cn } from '@/lib/design-tokens';
 import { 
   Users, 
   DollarSign, 
@@ -160,35 +168,37 @@ export function LunaxcodeDashboard() {
   ];
 
   return (
+    <div data-admin-page>
     <SidebarProvider>
       <LunaxcodeAppSidebar />
       <SidebarInset>
         <LunaxcodeSiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 min-h-0">
+        <div className="flex flex-1 flex-col gap-[var(--space-400)] p-[var(--space-400)] pt-0 min-h-0">
           {loading ? (
             <div className="flex h-96 items-center justify-center">
-              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[var(--color-border-focus)]"></div>
             </div>
           ) : (
             <>
               {/* Stats grid */}
-              <div className="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid auto-rows-min gap-[var(--space-400)] md:grid-cols-2 lg:grid-cols-4">
                 {dashboardStats.map((stat) => {
                   const Icon = stat.icon;
                   return (
-                    <Card key={stat.title}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between space-y-0 pb-2">
-                          <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                          <Icon className="h-4 w-4 text-muted-foreground" />
+                    <Card key={stat.title} variant="elevated">
+                      <CardContent className="p-[var(--space-600)]">
+                        <div className="flex items-center justify-between space-y-0 pb-[var(--space-200)]">
+                          <Text variant="bodySm" weight="medium" tone="secondary">{stat.title}</Text>
+                          <Icon className="h-4 w-4 text-[var(--color-icon-secondary)]" />
                         </div>
                         <div>
-                          <div className="text-2xl font-bold">{stat.value}</div>
-                          <p className={`text-xs ${
-                            stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                          }`}>
+                          <Heading variant="headingLg">{stat.value}</Heading>
+                          <Text 
+                            variant="caption" 
+                            tone={stat.trend === 'up' ? 'success' : 'critical'}
+                          >
                             {stat.change} from last month
-                          </p>
+                          </Text>
                         </div>
                       </CardContent>
                     </Card>
@@ -197,26 +207,26 @@ export function LunaxcodeDashboard() {
               </div>
 
               {/* Main content */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+              <div className="grid gap-[var(--space-400)] md:grid-cols-2 lg:grid-cols-7">
                 {/* Recent Submissions */}
-                <Card className="col-span-4">
+                <Card className="col-span-4" variant="default">
                   <CardHeader>
-                    <CardTitle>Recent Submissions</CardTitle>
+                    <CardTitle as="h2">Recent Submissions</CardTitle>
                     <CardDescription>
                       Latest project submissions that need your attention
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
+                    <div className="space-y-[var(--space-400)]">
                       {recentSubmissions.map((submission) => (
                         <div
                           key={submission.id}
-                          className="flex items-center justify-between p-4 border rounded-lg"
+                          className="flex items-center justify-between p-[var(--space-400)] border border-[var(--color-border)] rounded-[var(--radius-lg)] bg-[var(--color-bg-surface-hover)] hover:bg-[var(--color-bg-surface-selected)] transition-colors"
                         >
-                          <div className="space-y-1">
-                            <p className="font-medium">{submission.projectName}</p>
-                            <p className="text-sm text-muted-foreground">{submission.companyName}</p>
-                            <div className="flex items-center space-x-2">
+                          <div className="space-y-[var(--space-100)]">
+                            <Text variant="bodyMd" weight="medium">{submission.projectName}</Text>
+                            <Text variant="bodySm" tone="secondary">{submission.companyName}</Text>
+                            <div className="flex items-center space-x-[var(--space-200)]">
                               <Badge variant="outline">
                                 {submission.serviceType.replace('_', ' ')}
                               </Badge>
@@ -233,9 +243,9 @@ export function LunaxcodeDashboard() {
                             >
                               {submission.status}
                             </Badge>
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <Text variant="caption" tone="secondary" className="mt-1 block">
                               {submission.createdAt}
-                            </p>
+                            </Text>
                           </div>
                         </div>
                       ))}
@@ -244,26 +254,26 @@ export function LunaxcodeDashboard() {
                 </Card>
 
                 {/* Quick Actions */}
-                <Card className="col-span-3">
+                <Card className="col-span-3" variant="default">
                   <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
+                    <CardTitle as="h2">Quick Actions</CardTitle>
                     <CardDescription>
                       Common tasks and shortcuts
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid gap-4">
+                    <div className="grid gap-[var(--space-400)]">
                       {quickActions.map((action) => {
                         const Icon = action.icon;
                         return (
                           <Button
                             key={action.title}
                             variant="outline"
-                            className="h-auto p-4 flex items-start space-x-4 text-left"
+                            className="h-auto p-[var(--space-400)] flex items-start space-x-[var(--space-400)] text-left justify-start"
                             onClick={() => router.push(action.href)}
                           >
-                            <Icon className="h-6 w-6 mt-1 flex-shrink-0" />
-                            <span className="text-sm">{action.title}</span>
+                            <Icon className="h-6 w-6 mt-1 flex-shrink-0 text-[var(--color-icon)]" />
+                            <Text variant="bodySm">{action.title}</Text>
                           </Button>
                         );
                       })}
@@ -277,5 +287,6 @@ export function LunaxcodeDashboard() {
         <LunaxcodeSiteFooter />
       </SidebarInset>
     </SidebarProvider>
+    </div>
   );
 }

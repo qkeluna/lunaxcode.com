@@ -7,13 +7,20 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { LunaxcodeAppSidebar } from '@/components/admin/LunaxcodeAppSidebar';
 import { LunaxcodeSiteHeader } from '@/components/admin/LunaxcodeSiteHeader';
 import { LunaxcodeSiteFooter } from '@/components/admin/LunaxcodeSiteFooter';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/unified-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { 
+  UnifiedCard as Card, 
+  UnifiedCardHeader as CardHeader, 
+  UnifiedCardTitle as CardTitle, 
+  UnifiedCardContent as CardContent 
+} from '@/components/ui/unified-card';
+import { Text, Heading } from '@/components/ui/text';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/design-tokens';
 import { AdvancedDataTable, createSortableColumn } from '@/components/ui/advanced-data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
@@ -175,10 +182,10 @@ export default function PricingManagement() {
       accessorKey: "name",
       header: "Plan",
       cell: ({ row }) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-[var(--space-200)]">
           <div>
-            <div className="font-medium">{row.original.name}</div>
-            <div className="text-sm text-gray-500">{row.original.description}</div>
+            <Text variant="bodyMd" weight="medium">{row.original.name}</Text>
+            <Text variant="bodySm" tone="secondary">{row.original.description}</Text>
           </div>
           {row.original.popular && (
             <Badge variant="secondary" className="ml-2">
@@ -195,9 +202,9 @@ export default function PricingManagement() {
       accessorKey: "features",
       header: "Features",
       cell: ({ row }) => (
-        <div className="text-sm text-gray-500">
+        <Text variant="bodySm" tone="secondary">
           {row.original.features.length} feature{row.original.features.length !== 1 ? 's' : ''}
-        </div>
+        </Text>
       ),
     },
     {
@@ -228,8 +235,8 @@ export default function PricingManagement() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-border-focus)]"></div>
       </div>
     );
   }
@@ -240,6 +247,7 @@ export default function PricingManagement() {
 
   if (loading) {
     return (
+      <div data-admin-page>
       <SidebarProvider>
         <LunaxcodeAppSidebar />
         <SidebarInset>
@@ -252,23 +260,25 @@ export default function PricingManagement() {
           <LunaxcodeSiteFooter />
         </SidebarInset>
       </SidebarProvider>
+      </div>
     );
   }
 
   return (
+    <div data-admin-page>
     <SidebarProvider>
       <LunaxcodeAppSidebar />
       <SidebarInset>
         <LunaxcodeSiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 min-h-0">
-      <div className="space-y-6">
+        <div className="flex flex-1 flex-col gap-[var(--space-400)] p-[var(--space-400)] pt-0 min-h-0">
+      <div className="space-y-[var(--space-600)]">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pricing Plans</h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <Heading variant="headingLg" as="h1">Pricing Plans</Heading>
+            <Text variant="bodyMd" tone="secondary" className="mt-1">
               Manage your service pricing and packages
-            </p>
+            </Text>
           </div>
           
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -465,17 +475,17 @@ export default function PricingManagement() {
         )}
         
         {success && (
-          <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/50">
-            <AlertDescription className="text-green-800 dark:text-green-200">
+          <Alert className="border-[var(--color-border-success)] bg-[var(--color-bg-fill-success)] text-[var(--color-text-success)]">
+            <AlertDescription>
               {success}
             </AlertDescription>
           </Alert>
         )}
 
         {/* Plans Table */}
-        <Card>
+        <Card variant="elevated">
           <CardHeader>
-            <CardTitle>Pricing Plans ({Array.isArray(plans) ? plans.length : 0})</CardTitle>
+            <CardTitle as="h2">Pricing Plans ({Array.isArray(plans) ? plans.length : 0})</CardTitle>
           </CardHeader>
           <CardContent>
             <AdvancedDataTable
@@ -508,5 +518,6 @@ export default function PricingManagement() {
         <LunaxcodeSiteFooter />
       </SidebarInset>
     </SidebarProvider>
+    </div>
   );
 }

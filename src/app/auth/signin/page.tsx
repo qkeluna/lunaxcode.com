@@ -3,10 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { 
+  UnifiedCard as Card, 
+  UnifiedCardHeader as CardHeader, 
+  UnifiedCardTitle as CardTitle, 
+  UnifiedCardContent as CardContent 
+} from "@/components/ui/unified-card";
+import { Text, Heading } from "@/components/ui/text";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import Link from "next/link";
@@ -62,33 +68,33 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] py-12 px-4 sm:px-6 lg:px-8" data-admin-page>
+      <div className="max-w-md w-full space-y-[var(--space-800)]">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <Heading variant="headingLg" className="text-[var(--color-text)]">
             Sign in to your account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          </Heading>
+          <Text variant="bodyMd" tone="secondary" className="mt-[var(--space-200)]">
             Access the Lunaxcode CMS dashboard
-          </p>
+          </Text>
         </div>
 
-        <Card>
+        <Card variant="elevated">
           <CardHeader>
             <CardTitle className="text-center">Welcome Back</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-[var(--space-600)]">
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
-            <form onSubmit={handleEmailSignIn} className="space-y-4">
+            <form onSubmit={handleEmailSignIn} className="space-y-[var(--space-400)]">
               <div>
                 <Label htmlFor="email">Email address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-[var(--color-icon-secondary)]" />
                   <Input
                     id="email"
                     type="email"
@@ -104,7 +110,7 @@ export default function SignIn() {
               <div>
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-[var(--color-icon-secondary)]" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -117,7 +123,7 @@ export default function SignIn() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-3 text-[var(--color-icon-secondary)] hover:text-[var(--color-icon)]"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -129,7 +135,8 @@ export default function SignIn() {
               </div>
 
               <Button
-                type="submit"
+                variant="primary"
+                size="md"
                 className="w-full"
                 disabled={isLoading}
               >
@@ -139,18 +146,18 @@ export default function SignIn() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-[var(--color-border)]" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
+                <span className="px-[var(--space-200)] bg-[var(--color-bg-surface)] text-[var(--color-text-secondary)]">
                   Or continue with
                 </span>
               </div>
             </div>
 
             <Button
-              type="button"
-              variant="outline"
+              variant="secondary"
+              size="md"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
               className="w-full"
@@ -165,15 +172,15 @@ export default function SignIn() {
             </Button>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <Text variant="bodySm" tone="secondary">
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/auth/signup"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-medium text-[var(--color-text-link)] hover:text-[var(--color-text-link-hover)]"
                 >
                   Sign up
                 </Link>
-              </p>
+              </Text>
             </div>
           </CardContent>
         </Card>

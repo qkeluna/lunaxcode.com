@@ -1,3 +1,8 @@
+---
+description:
+globs:
+alwaysApply: true
+---
 # Lunaxcode.com Cursor Rules
 # Project: Next.js 15 Marketing Website for Filipino Web Development Agency
 # Last Updated: January 2025

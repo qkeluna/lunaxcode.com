@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from "@/lib/auth-client";
+import { useState } from 'react';
+import { useRequireAdmin } from "@/lib/auth-client";
+import { useOnboardingSubmissions, useUpdateOnboardingSubmission, type OnboardingSubmission } from "@/lib/collections";
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { LunaxcodeAppSidebar } from '@/components/admin/LunaxcodeAppSidebar';
 import { LunaxcodeSiteHeader } from '@/components/admin/LunaxcodeSiteHeader';
@@ -18,132 +18,50 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 
-interface OnboardingSubmission {
-  id: string;
-  projectName: string;
-  companyName: string;
-  contactName: string;
-  email: string;
-  phone: string;
-  serviceType: 'landing_page' | 'web_app' | 'mobile_app';
-  industry: string;
-  projectDescription: string;
-  timeline: string;
-  budget: string;
-  features: string[];
-  designPreferences: string;
-  contentReady: boolean;
-  additionalServices: string[];
-  status: 'new' | 'in_review' | 'approved' | 'in_progress' | 'completed' | 'rejected';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  createdAt: string;
-  updatedAt: string;
-}
+// OnboardingSubmission type is now imported from collections
 
 export default function SubmissionsPage() {
-  const { data: session, isPending } = useSession();
-  const router = useRouter();
-  const [submissions, setSubmissions] = useState<OnboardingSubmission[]>([]);
+  const { isAdmin, isPending } = useRequireAdmin();
   const [selectedSubmission, setSelectedSubmission] = useState<OnboardingSubmission | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isPending && !session) {
-      router.push('/admin');
-    }
-  }, [session, isPending, router]);
-
-  useEffect(() => {
-    fetchSubmissions();
-  }, []);
-
-  const fetchSubmissions = async () => {
-    try {
-      // Mock data for now - replace with actual API call
-      const mockSubmissions: OnboardingSubmission[] = [
-        {
-          id: '1',
-          projectName: 'E-commerce Platform',
-          companyName: 'Tech Solutions Inc.',
-          contactName: 'John Doe',
-          email: 'john@techsolutions.com',
-          phone: '+63 912 345 6789',
-          serviceType: 'web_app',
-          industry: 'E-commerce',
-          projectDescription: 'A comprehensive e-commerce platform with payment integration',
-          timeline: '4-6 weeks',
-          budget: '₱50,000 - ₱100,000',
-          features: ['User Authentication', 'Payment Gateway', 'Inventory Management'],
-          designPreferences: 'Modern, clean design with blue color scheme',
-          contentReady: true,
-          additionalServices: ['SEO Optimization', 'Maintenance Package'],
-          status: 'new',
-          priority: 'high',
-          createdAt: '2023-12-20T10:30:00Z',
-          updatedAt: '2023-12-20T10:30:00Z',
-        },
-        {
-          id: '2',
-          projectName: 'Restaurant Website',
-          companyName: 'Foodie Delights',
-          contactName: 'Maria Santos',
-          email: 'maria@foodiedelights.com',
-          phone: '+63 917 123 4567',
-          serviceType: 'landing_page',
-          industry: 'Food & Beverage',
-          projectDescription: 'A simple landing page for our restaurant with menu and contact info',
-          timeline: '1-2 weeks',
-          budget: '₱15,000 - ₱25,000',
-          features: ['Online Menu', 'Contact Form', 'Location Map'],
-          designPreferences: 'Warm colors, food photography focused',
-          contentReady: false,
-          additionalServices: ['Social Media Integration'],
-          status: 'in_progress',
-          priority: 'medium',
-          createdAt: '2023-12-19T14:15:00Z',
-          updatedAt: '2023-12-20T09:00:00Z',
-        },
-        {
-          id: '3',
-          projectName: 'Mobile Banking App',
-          companyName: 'FinTech Startup',
-          contactName: 'David Lee',
-          email: 'david@fintech.ph',
-          phone: '+63 905 987 6543',
-          serviceType: 'mobile_app',
-          industry: 'Financial Services',
-          projectDescription: 'A secure mobile banking application with advanced features',
-          timeline: '12-16 weeks',
-          budget: '₱200,000+',
-          features: ['Biometric Authentication', 'Real-time Transactions', 'Budget Tracking'],
-          designPreferences: 'Professional, trustworthy design with green accents',
-          contentReady: true,
-          additionalServices: ['Security Audit', 'App Store Optimization'],
-          status: 'approved',
-          priority: 'urgent',
-          createdAt: '2023-12-18T16:45:00Z',
-          updatedAt: '2023-12-19T11:30:00Z',
-        },
-      ];
-      setSubmissions(mockSubmissions);
-    } catch (error) {
-      console.error('Error fetching submissions:', error);
-    }
-  };
+  // Use TanStack Query to get onboarding submissions
+  const { data: submissions = [], error, isLoading } = useOnboardingSubmissions();
+  const updateSubmissionMutation = useUpdateOnboardingSubmission();
 
   const handleViewSubmission = (submission: OnboardingSubmission) => {
     setSelectedSubmission(submission);
     setIsViewModalOpen(true);
   };
 
+  const handleUpdateStatus = async (submissionId: string, newStatus: OnboardingSubmission['status']) => {
+    try {
+      // Use TanStack Query mutation for optimistic updates
+      await updateSubmissionMutation.mutateAsync({
+        id: submissionId,
+        updates: {
+          status: newStatus,
+          updatedAt: new Date(),
+        },
+      });
+    } catch (error) {
+      console.error('Error updating submission status:', error);
+    }
+  };
 
   const handleDeleteSubmission = async (submissionId: string) => {
     if (confirm('Are you sure you want to delete this submission?')) {
       try {
-        // Remove from local state for now - replace with API call
-        setSubmissions(prev => prev.filter(sub => sub.id !== submissionId));
+        // For now, just update status to 'rejected' - you can implement actual delete API later
+        await updateSubmissionMutation.mutateAsync({
+          id: submissionId,
+          updates: {
+            status: 'rejected' as const,
+            updatedAt: new Date(),
+          },
+        });
       } catch (error) {
         console.error('Error deleting submission:', error);
       }
@@ -159,7 +77,7 @@ export default function SubmissionsPage() {
         <div>
           <div className="font-medium">{row.original.projectName}</div>
           <div className="text-sm text-gray-500">{row.original.companyName}</div>
-          <div className="text-xs text-gray-400">{row.original.contactName}</div>
+          <div className="text-xs text-gray-400">{row.original.name}</div>
         </div>
       ),
     },
@@ -209,16 +127,32 @@ export default function SubmissionsPage() {
     },
   ];
 
-  if (isPending) {
+  if (isPending || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="text-sm text-gray-600">Loading submissions...</p>
+        </div>
       </div>
     );
   }
 
-  if (!session) {
+  if (!isAdmin) {
     return null;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Error loading submissions: {error.message}</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -297,36 +231,41 @@ export default function SubmissionsPage() {
                   <div>
                     <h3 className="font-semibold mb-3">Contact Information</h3>
                     <div className="space-y-2 text-sm">
-                      <div><strong>Contact Name:</strong> {selectedSubmission.contactName}</div>
+                      <div><strong>Contact Name:</strong> {selectedSubmission.name}</div>
                       <div><strong>Email:</strong> {selectedSubmission.email}</div>
-                      <div><strong>Phone:</strong> {selectedSubmission.phone}</div>
-                      <div><strong>Content Ready:</strong> {selectedSubmission.contentReady ? 'Yes' : 'No'}</div>
+                      <div><strong>Phone:</strong> {selectedSubmission.phone || 'Not provided'}</div>
+                      <div><strong>Status:</strong> {selectedSubmission.status}</div>
+                      <div><strong>Priority:</strong> {selectedSubmission.priority}</div>
                     </div>
                   </div>
                   <div className="md:col-span-2">
                     <h3 className="font-semibold mb-3">Project Description</h3>
-                    <p className="text-sm text-gray-600">{selectedSubmission.projectDescription}</p>
+                    <p className="text-sm text-gray-600">{selectedSubmission.description || 'No description provided'}</p>
                   </div>
-                  <div>
-                    <h3 className="font-semibold mb-3">Required Features</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedSubmission.features.map((feature, index) => (
-                        <Badge key={index} variant="secondary">{feature}</Badge>
-                      ))}
+                  {selectedSubmission.serviceSpecificData && (
+                    <div className="md:col-span-2">
+                      <h3 className="font-semibold mb-3">Service-Specific Details</h3>
+                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                        {JSON.stringify(selectedSubmission.serviceSpecificData, null, 2)}
+                      </pre>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-3">Additional Services</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedSubmission.additionalServices.map((service, index) => (
-                        <Badge key={index} variant="outline">{service}</Badge>
-                      ))}
+                  )}
+                  {selectedSubmission.addOns && selectedSubmission.addOns.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-3">Selected Add-ons</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedSubmission.addOns.map((addon, index) => (
+                          <Badge key={index} variant="outline">{addon}</Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <h3 className="font-semibold mb-3">Design Preferences</h3>
-                    <p className="text-sm text-gray-600">{selectedSubmission.designPreferences}</p>
-                  </div>
+                  )}
+                  {selectedSubmission.additionalRequirements && (
+                    <div className="md:col-span-2">
+                      <h3 className="font-semibold mb-3">Additional Requirements</h3>
+                      <p className="text-sm text-gray-600">{selectedSubmission.additionalRequirements}</p>
+                    </div>
+                  )}
                 </div>
               )}
             </DialogContent>

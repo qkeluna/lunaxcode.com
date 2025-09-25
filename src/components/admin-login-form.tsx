@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/design-tokens";
+import { Button } from "@/components/ui/unified-button";
+import { 
+  UnifiedCard as Card, 
+  UnifiedCardContent as CardContent 
+} from "@/components/ui/unified-card";
+import { Text, Heading } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -37,13 +41,13 @@ export function AdminLoginForm({
       const result = await authClient.signIn.email({
         email: formData.email,
         password: formData.password,
-        callbackURL: "/dashboard",
+        callbackURL: "/admin/dashboard",
       });
 
       if (result.error) {
         setError(result.error.message || "Login failed");
       } else {
-        router.push("/dashboard");
+        router.push("/admin/dashboard");
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
@@ -60,7 +64,7 @@ export function AdminLoginForm({
     try {
       const result = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: "/admin/dashboard",
       });
 
       if (result.error) {
@@ -75,19 +79,22 @@ export function AdminLoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+    <div className={cn("flex flex-col gap-[var(--space-600)]", className)} {...props}>
+      <Card variant="elevated" className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
-            <div className="flex flex-col gap-6">
+          <form onSubmit={handleSubmit} className="p-[var(--space-600)] md:p-[var(--space-800)]">
+            <div className="flex flex-col gap-[var(--space-600)]">
               <div className="flex flex-col items-center text-center">
-                <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent mb-2">
+                <Heading 
+                  variant="headingMd" 
+                  className="bg-gradient-to-r from-[var(--color-blue-13)] to-[var(--color-blue-14)] bg-clip-text text-transparent mb-[var(--space-200)]"
+                >
                   Lunaxcode
-                </div>
-                <h1 className="text-2xl font-bold">Admin Login</h1>
-                <p className="text-muted-foreground text-balance">
+                </Heading>
+                <Heading variant="headingMd" as="h1">Admin Login</Heading>
+                <Text variant="bodyMd" tone="secondary" className="text-balance">
                   Sign in to access the admin dashboard
-                </p>
+                </Text>
               </div>
 
               {error && (
@@ -97,7 +104,7 @@ export function AdminLoginForm({
                 </Alert>
               )}
 
-              <div className="grid gap-3">
+              <div className="grid gap-[var(--space-300)]">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -110,12 +117,12 @@ export function AdminLoginForm({
                   disabled={loading}
                 />
               </div>
-              <div className="grid gap-3">
+              <div className="grid gap-[var(--space-300)]">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <button
                     type="button"
-                    className="ml-auto text-sm underline-offset-2 hover:underline text-muted-foreground"
+                    className="ml-auto text-sm underline-offset-2 hover:underline text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
                     onClick={() => alert("Please contact admin@lunaxcode.com for password reset")}
                   >
                     Forgot your password?
@@ -131,7 +138,7 @@ export function AdminLoginForm({
                   disabled={loading}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button variant="primary" size="md" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -141,14 +148,14 @@ export function AdminLoginForm({
                   "Sign In"
                 )}
               </Button>
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="bg-card text-muted-foreground relative z-10 px-2">
+              <div className="after:border-[var(--color-border)] relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                <span className="bg-[var(--color-bg-surface)] text-[var(--color-text-secondary)] relative z-10 px-[var(--space-200)]">
                   Or continue with
                 </span>
               </div>
               <Button
-                type="button"
-                variant="outline"
+                variant="secondary"
+                size="md"
                 className="w-full"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
@@ -165,36 +172,45 @@ export function AdminLoginForm({
                 )}
                 Sign in with Google
               </Button>
-              <div className="text-center text-sm">
-                Need an account?{" "}
-                <a href="mailto:admin@lunaxcode.com" className="underline underline-offset-4">
-                  Contact Admin
-                </a>
+              <div className="text-center">
+                <Text variant="bodySm">
+                  Need an account?{" "}
+                  <a 
+                    href="mailto:admin@lunaxcode.com" 
+                    className="underline underline-offset-4 text-[var(--color-text-link)] hover:text-[var(--color-text-link-hover)]"
+                  >
+                    Contact Admin
+                  </a>
+                </Text>
               </div>
             </div>
           </form>
-          <div className="bg-muted relative hidden md:block">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center">
-              <div className="text-center text-white p-8">
-                <div className="text-4xl font-bold mb-4">⚡</div>
-                <h2 className="text-2xl font-bold mb-2">Speed & Excellence</h2>
-                <p className="text-blue-100">
+          <div className="bg-[var(--color-bg-surface-hover)] relative hidden md:block">
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-blue-13)] to-[var(--color-blue-14)] flex items-center justify-center">
+              <div className="text-center text-white p-[var(--space-800)]">
+                <div className="text-4xl font-bold mb-[var(--space-400)]">⚡</div>
+                <Heading variant="headingMd" className="text-white mb-[var(--space-200)]">
+                  Speed & Excellence
+                </Heading>
+                <Text variant="bodyMd" className="text-blue-100">
                   Managing projects at the speed of light
-                </p>
+                </Text>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground text-center text-xs text-balance">
-        By signing in, you agree to our{" "}
-        <button className="underline underline-offset-4 text-muted-foreground hover:text-foreground">
-          Terms of Service
-        </button>{" "}
-        and{" "}
-        <button className="underline underline-offset-4 text-muted-foreground hover:text-foreground">
-          Privacy Policy
-        </button>.
+      <div className="text-center">
+        <Text variant="caption" tone="secondary" className="text-balance">
+          By signing in, you agree to our{" "}
+          <button className="underline underline-offset-4 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">
+            Terms of Service
+          </button>{" "}
+          and{" "}
+          <button className="underline underline-offset-4 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">
+            Privacy Policy
+          </button>.
+        </Text>
       </div>
     </div>
   );
