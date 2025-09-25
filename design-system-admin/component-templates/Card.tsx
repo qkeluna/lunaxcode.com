@@ -115,7 +115,7 @@ export interface CardProps
   /**
    * Render as different HTML element
    */
-  as?: keyof React.JSX.IntrinsicElements
+  as?: React.ElementType
 
   /**
    * Card title (for accessibility and SEO)
@@ -161,7 +161,8 @@ export interface CardSectionProps extends React.HTMLAttributes<HTMLDivElement> {
 
 // Main Card Component
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, padding, sectioned, as: Component = "div", ...props }, ref) => {
+  ({ className, variant, padding, sectioned, as = "div", ...props }, ref) => {
+    const Component = as as React.ElementType;
     return (
       <Component
         ref={ref}

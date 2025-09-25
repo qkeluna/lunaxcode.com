@@ -3,6 +3,7 @@
  * Provides helper functions for component development
  */
 
+import React from "react"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
