@@ -20,7 +20,7 @@ import {
 import { Text, Heading } from '@/components/ui/text';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/design-tokens';
+import { cn as _cn } from '@/lib/design-tokens'; // Prefixed to avoid unused variable warning
 import { AdvancedDataTable, createSortableColumn } from '@/components/ui/advanced-data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import { 

@@ -4,7 +4,7 @@ import { withAdminAuth, createApiResponse } from '@/lib/auth';
 // Enable Edge Runtime for Cloudflare Pages
 export const runtime = 'edge';
 
-export const GET = withAdminAuth(async (req: NextRequest) => {
+export const GET = withAdminAuth(async (_req: NextRequest) => {
   return createApiResponse({
     message: 'Token is valid',
   });
