@@ -115,8 +115,14 @@ export function Pricing({ onGetStarted }: PricingProps) {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://lunaxcode-admin-qkeluna8941-yv8g04xo.apn.leapcell.dev/api/v1';
 
         const [pricingResponse, addonsResponse] = await Promise.all([
-          fetch(`${apiBaseUrl}/pricing-plans/`).catch(() => null),
-          fetch(`${apiBaseUrl}/addon-services/`).catch(() => null)
+          fetch(`${apiBaseUrl}/pricing-plans/popular`).catch((error) => {
+            console.error('Error fetching pricing plans:', error);
+            return null;
+          }),
+          fetch(`${apiBaseUrl}/addon-services/popular`).catch((error) => {
+            console.error('Error fetching addon services:', error);
+            return null;
+          })
         ]);
 
         // Handle pricing plans with fallback
@@ -137,7 +143,12 @@ export function Pricing({ onGetStarted }: PricingProps) {
             setPricingPlans(getFallbackPricing());
           }
         } else {
-          console.warn('External API not available, using fallback pricing');
+          if (pricingResponse) {
+            console.warn(`Pricing API returned status ${pricingResponse.status}: ${pricingResponse.statusText}`);
+          } else {
+            console.warn('Pricing API request failed completely');
+          }
+          console.warn('Using fallback pricing data');
           setPricingPlans(getFallbackPricing());
         }
 
@@ -159,7 +170,12 @@ export function Pricing({ onGetStarted }: PricingProps) {
             setAddOnServices(getFallbackAddons());
           }
         } else {
-          console.warn('External API not available, using fallback addons');
+          if (addonsResponse) {
+            console.warn(`Addons API returned status ${addonsResponse.status}: ${addonsResponse.statusText}`);
+          } else {
+            console.warn('Addons API request failed completely');
+          }
+          console.warn('Using fallback addons data');
           setAddOnServices(getFallbackAddons());
         }
       } catch (error) {
