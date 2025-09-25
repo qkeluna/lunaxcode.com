@@ -26,17 +26,17 @@ export const formFieldConfigSchema = z.object({
   placeholder: z.string().optional(),
   required: z.boolean().default(false),
   options: z.array(fieldOptionSchema).optional(),
-  validation: z.record(z.unknown()).optional(),
+  validation: z.record(z.string(), z.unknown()).optional(),
   helpText: z.string().optional(),
   dependsOn: z.string().optional(),
-  conditionalLogic: z.record(z.unknown()).optional(),
+  conditionalLogic: z.record(z.string(), z.unknown()).optional(),
 });
 
 // Step form configuration schema
 export const stepFormConfigSchema = z.object({
   fields: z.array(formFieldConfigSchema),
   layout: uiLayoutSchema.default('single_column'),
-  validation: z.record(z.unknown()).default({}),
+  validation: z.record(z.string(), z.unknown()).default({}),
   submitButtonText: z.string().optional(),
   helpText: z.string().optional(),
 });
@@ -81,24 +81,24 @@ export const onboardingStepConfigSchema = z.object({
   stepDescription: z.string().optional(),
   
   // Validation and Schema
-  validationSchema: z.record(z.unknown()).optional(),
+  validationSchema: z.record(z.string(), z.unknown()).optional(),
   requiredFields: z.array(z.string()).optional(),
   optionalFields: z.array(z.string()).optional(),
   
   // UI Configuration
   componentType: componentTypeSchema,
-  formConfig: z.record(z.unknown()).optional(),
+  formConfig: z.record(z.string(), z.unknown()).optional(),
   uiLayout: uiLayoutSchema.optional(),
   
   // Flow Control
-  nextStepConditions: z.record(z.unknown()).optional(),
-  skipConditions: z.record(z.unknown()).optional(),
+  nextStepConditions: z.record(z.string(), z.unknown()).optional(),
+  skipConditions: z.record(z.string(), z.unknown()).optional(),
   backAllowed: z.boolean().default(true),
   
   // Service Type Specific
   serviceTypes: z.array(serviceTypeSchema).optional(),
   isConditional: z.boolean().default(false),
-  conditionalLogic: z.record(z.unknown()).optional(),
+  conditionalLogic: z.record(z.string(), z.unknown()).optional(),
   
   // Progress and Display
   displayOrder: z.number().int().min(0),
@@ -126,9 +126,9 @@ export const onboardingStepProgressSchema = z.object({
   status: stepStatusSchema.default('pending'),
   
   // Step Data
-  stepData: z.record(z.unknown()).optional(),
+  stepData: z.record(z.string(), z.unknown()).optional(),
   validationErrors: z.array(z.string()).optional(),
-  userInput: z.record(z.unknown()).optional(),
+  userInput: z.record(z.string(), z.unknown()).optional(),
   
   // Timing and Analytics
   startedAt: z.date().optional(),
@@ -218,7 +218,7 @@ export const onboardingFlowStateSchema = z.object({
   currentStep: z.number().int().positive(),
   currentStepName: stepNameSchema,
   stepHistory: z.array(z.string()),
-  formData: z.record(z.unknown()),
+  formData: z.record(z.string(), z.unknown()),
   serviceType: serviceTypeSchema,
   isComplete: z.boolean(),
   startedAt: z.date(),
@@ -234,8 +234,8 @@ export const createOnboardingStepRequestSchema = z.object({
   stepDescription: z.string().optional(),
   componentType: componentTypeSchema,
   serviceTypes: z.array(serviceTypeSchema).optional(),
-  validationSchema: z.record(z.unknown()).optional(),
-  formConfig: z.record(z.unknown()).optional(),
+  validationSchema: z.record(z.string(), z.unknown()).optional(),
+  formConfig: z.record(z.string(), z.unknown()).optional(),
   isRequired: z.boolean().default(true),
   displayOrder: z.number().int().min(0),
 });
@@ -253,7 +253,7 @@ export const startOnboardingFlowRequestSchema = z.object({
 export const submitStepDataRequestSchema = z.object({
   sessionId: z.string().min(1, 'Session ID is required'),
   stepId: z.string().min(1, 'Step ID is required'),
-  stepData: z.record(z.unknown()),
+  stepData: z.record(z.string(), z.unknown()),
   timeSpent: z.number().int().min(0).optional(),
   deviceType: deviceTypeSchema.optional(),
 });
@@ -262,7 +262,7 @@ export const submitStepDataRequestSchema = z.object({
 
 export const serviceSelectionStepSchema = z.object({
   serviceType: serviceTypeSchema,
-  serviceDetails: z.record(z.unknown()).optional(),
+  serviceDetails: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const basicInfoStepSchema = z.object({
